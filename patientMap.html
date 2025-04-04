@@ -4,20 +4,99 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Patient Map</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+    header {
+      background-color: #007BFF;
+      color: #fff;
+      padding: 20px;
+    }
+    header h1 {
+      margin: 0 0 10px;
+      text-align: center;
+    }
+    .header-flex {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .tabs {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tablink {
+      padding: 10px 20px;
+      cursor: pointer;
+      background-color: #fff;
+      border: 1px solid #007BFF;
+      border-radius: 5px;
+      color: #007BFF;
+      font-size: 16px;
+    }
+    .tablink.active {
+      background-color: #007BFF;
+      color: #fff;
+    }
+    .add-patient-container {
+      /* Push the button to the right */
+    }
+    .add-patient-btn {
+      background-color: #28a745; /* Distinct green color */
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .add-patient-btn:hover {
+      background-color: #218838;
+    }
+    .tabcontent {
+      background: #fff;
+      margin: 20px;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+    table th {
+      background-color: #007BFF;
+      color: #fff;
+    }
+  </style>
 </head>
 <body>
   <header>
     <h1>Patient Map</h1>
-    <nav>
-      <button onclick="window.location.href='addPatient.html'">Add Patient</button>
-    </nav>
+    <div class="header-flex">
+      <div class="tabs">
+        <button class="tablink" onclick="openWard(event, 'WardA')">Ward A</button>
+        <button class="tablink" onclick="openWard(event, 'WardB')">Ward B</button>
+        <button class="tablink" onclick="openWard(event, 'WardC')">Ward C</button>
+      </div>
+      <div class="add-patient-container">
+        <button class="add-patient-btn" onclick="window.location.href='addPatient.html'">Add Patient</button>
+      </div>
+    </div>
   </header>
-  <div class="tabs">
-    <button class="tablink" onclick="openWard(event, 'WardA')">Ward A</button>
-    <button class="tablink" onclick="openWard(event, 'WardB')">Ward B</button>
-    <button class="tablink" onclick="openWard(event, 'WardC')">Ward C</button>
-  </div>
+  
   <!-- Ward A Content -->
   <div id="WardA" class="tabcontent">
     <h2>Ward A</h2>
@@ -31,7 +110,6 @@
         </tr>
       </thead>
       <tbody>
-        <!-- Example row -->
         <tr>
           <td>John Doe</td>
           <td>Dr. Smith</td>
@@ -44,6 +122,7 @@
       </tbody>
     </table>
   </div>
+  
   <!-- Ward B Content -->
   <div id="WardB" class="tabcontent" style="display:none;">
     <h2>Ward B</h2>
@@ -61,6 +140,7 @@
       </tbody>
     </table>
   </div>
+  
   <!-- Ward C Content -->
   <div id="WardC" class="tabcontent" style="display:none;">
     <h2>Ward C</h2>
@@ -78,7 +158,7 @@
       </tbody>
     </table>
   </div>
-
+  
   <script>
     // Function for switching tabs between wards
     function openWard(evt, wardName) {
@@ -97,12 +177,10 @@
 
     // Dummy functions for patient actions
     function editPatient(btn) {
-      // Code to edit patient details could be implemented here
       alert("Edit patient functionality to be implemented.");
     }
 
     function dischargePatient(btn) {
-      // Code to mark a patient as discharged
       var row = btn.parentNode.parentNode;
       row.style.backgroundColor = "#f8d7da"; // Visual cue for discharged patient
       alert("Patient marked as discharged.");
