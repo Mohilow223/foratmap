@@ -4,7 +4,106 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Add Patient</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Global styles for the page */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #007BFF;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+    form {
+      background: #fff;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #333;
+    }
+    input[type="text"],
+    input[type="number"],
+    textarea {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    textarea {
+      resize: vertical;
+    }
+    /* Checkbox group styling */
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 5px;
+    }
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: normal;
+    }
+    /* Button group styling */
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .go-back-btn {
+      background-color: #6c757d;
+    }
+    /* Medication section styling */
+    .medication-section {
+      margin-top: 20px;
+    }
+    .medication-section h3 {
+      margin-top: 0;
+    }
+    #medicationsTable {
+      display: none;
+      margin-top: 10px;
+    }
+    #medicationsTable table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    #medicationsTable th, #medicationsTable td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    #medicationsTable th {
+      background-color: #007BFF;
+      color: #fff;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -27,23 +126,46 @@
       <label for="roomNumber">Room Number:</label>
       <input type="text" id="roomNumber" name="roomNumber" required>
     </div>
+    <!-- Past Medical History (PMHx) with enum list -->
     <div class="form-group">
-      <label for="phmx">Past Medical History (PHMx):</label>
-      <textarea id="phmx" name="phmx"></textarea>
+      <label>Past Medical History (PMHx):</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="pmhx[]" value="COPD"> COPD</label>
+        <label><input type="checkbox" name="pmhx[]" value="HF"> HF</label>
+        <label><input type="checkbox" name="pmhx[]" value="HTN"> HTN</label>
+        <label><input type="checkbox" name="pmhx[]" value="IHD"> IHD</label>
+        <label><input type="checkbox" name="pmhx[]" value="DM"> DM</label>
+        <label><input type="checkbox" name="pmhx[]" value="Asthma"> Asthma</label>
+      </div>
+      <label for="pmhxOther">Other (specify):</label>
+      <input type="text" id="pmhxOther" name="pmhxOther" placeholder="Enter additional PMHx">
     </div>
+    <!-- Past Surgical History (PSHx) with enum list -->
     <div class="form-group">
-      <label for="pshx">Past Surgical History (PShx):</label>
-      <textarea id="pshx" name="pshx"></textarea>
+      <label>Past Surgical History (PSHx):</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="pshx[]" value="Cholecystectomy"> Cholecystectomy</label>
+        <label><input type="checkbox" name="pshx[]" value="Appendectomy"> Appendectomy</label>
+        <label><input type="checkbox" name="pshx[]" value="C/S"> C/S</label>
+      </div>
+      <label for="pshxOther">Other (specify):</label>
+      <input type="text" id="pshxOther" name="pshxOther" placeholder="Enter additional PSHx">
     </div>
     <div class="form-group">
       <label for="diagnosis">Diagnosis (Dx):</label>
       <textarea id="diagnosis" name="diagnosis" required></textarea>
     </div>
+    <!-- Rotater note free text box -->
     <div class="form-group">
+      <label for="rotaterNote">Rotater Note:</label>
+      <textarea id="rotaterNote" name="rotaterNote" placeholder="Enter rotation note here"></textarea>
+    </div>
+    <!-- Medications section -->
+    <div class="form-group medication-section">
       <label for="medications">Medications:</label>
       <button type="button" onclick="toggleMedications()">Add Medications</button>
     </div>
-    <div id="medicationsTable" style="display:none;">
+    <div id="medicationsTable">
       <h3>Medication Details</h3>
       <table id="medicationDetails">
         <thead>
@@ -60,20 +182,24 @@
       </table>
       <button type="button" onclick="addMedicationRow()">Add Medication Row</button>
     </div>
-    <button type="submit">Submit</button>
+    <!-- Submit and Go Back buttons -->
+    <div class="button-group">
+      <button type="submit">Submit</button>
+      <button type="button" class="go-back-btn" onclick="goBack()">Go Back</button>
+    </div>
   </form>
 
   <script>
     // Toggle the visibility of the medication table
     function toggleMedications() {
       var table = document.getElementById("medicationsTable");
-      table.style.display = (table.style.display === "none") ? "block" : "none";
+      table.style.display = (table.style.display === "none" || table.style.display === "") ? "block" : "none";
     }
 
     // Dynamically add a new medication row
     function addMedicationRow() {
-      var table = document.getElementById("medicationDetails").getElementsByTagName('tbody')[0];
-      var row = table.insertRow();
+      var tableBody = document.getElementById("medicationDetails").getElementsByTagName('tbody')[0];
+      var row = tableBody.insertRow();
       
       var cell1 = row.insertCell(0);
       var medName = document.createElement("input");
@@ -101,11 +227,16 @@
       removeButton.type = "button";
       removeButton.textContent = "Remove";
       removeButton.onclick = function() {
-        // Remove this medication row
-        table.deleteRow(row.rowIndex - 1);
+        tableBody.removeChild(row);
       };
       cell4.appendChild(removeButton);
+    }
+
+    // Go back to the previous page
+    function goBack() {
+      window.history.back();
     }
   </script>
 </body>
 </html>
+
