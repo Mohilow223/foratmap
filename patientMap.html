@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Patient Map</title>
   <!-- Include Parse SDK -->
   <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
@@ -100,6 +100,72 @@
         font-size: 14px;
       }
     }
+    /* Modal styling */
+    #medicationsModal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+    #medicationsModal .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 5px;
+      width: 90%;
+      max-width: 600px;
+      position: relative;
+    }
+    #medicationsModal h2 {
+      margin-top: 0;
+    }
+    #medicationsModal table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    #medicationsModal table, 
+    #medicationsModal th, 
+    #medicationsModal td {
+      border: 1px solid #ddd;
+    }
+    #medicationsModal th, 
+    #medicationsModal td {
+      padding: 8px;
+      text-align: left;
+    }
+    #medicationsModal th {
+      background-color: #007BFF;
+      color: #fff;
+    }
+    #medicationsModal .modal-buttons {
+      margin-top: 15px;
+      text-align: right;
+    }
+    #medicationsModal button {
+      padding: 8px 16px;
+      margin-left: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #medicationsModal .save-btn {
+      background-color: #28a745;
+      color: #fff;
+    }
+    #medicationsModal .print-btn {
+      background-color: #007BFF;
+      color: #fff;
+    }
+    #medicationsModal .close-btn {
+      background-color: #6c757d;
+      color: #fff;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
   </style>
 </head>
 <body>
@@ -180,10 +246,42 @@
     </div>
   </div>
   
+  <!-- Medications Modal -->
+  <div id="medicationsModal">
+    <div class="modal-content">
+      <button class="close-btn" onclick="closeMedicationsModal()">Close</button>
+      <h2>Edit Medications</h2>
+      <div class="modal-table-container">
+        <table id="modalMedicationTable">
+          <thead>
+            <tr>
+              <th>Medication Name</th>
+              <th>Dose</th>
+              <th>Frequency</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Medication rows will be added here -->
+          </tbody>
+        </table>
+      </div>
+      <button type="button" onclick="addModalMedicationRow()">Add Medication Row</button>
+      <div class="modal-buttons">
+        <button class="save-btn" onclick="saveMedications()">Save</button>
+        <button class="print-btn" onclick="printModalMedications()">Print</button>
+      </div>
+    </div>
+  </div>
+  
   <script>
     // Initialize Parse with your Back4App credentials
     Parse.initialize("JntBzRh42hSe74SIbVM1CQZr2D51YcVbDKcH60m6", "yxn7Yup1UUZildFxcG8a0gmZmUBFEkBwD6gfP702");
     Parse.serverURL = 'https://parseapi.back4app.com/';
+    
+    // Global variable to store current patient ID for medications modal
+    let currentPatientIdForMedications = null;
+    let currentPatientRecord = null; // Used when editing medications in modal
     
     // Function to switch between ward tabs
     function openWard(evt, wardName) {
@@ -213,14 +311,13 @@
           // Assume the patient record includes a "ward" field.
           // Default to "Ward A" if not present.
           let ward = patient.get("ward") || "Ward A";
-          // Get patient details
           const name = patient.get("name") || "";
           const doctor = patient.get("doctor") || "";
           const roomNumber = patient.get("roomNumber") || "";
           const diagnosis = patient.get("diagnosis") || "";
           const objectId = patient.id;
           
-          // Create a new table row
+          // Create a new table row with new action buttons: Edit, Discharge, Print Meds, and Medications
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${name}</td>
@@ -230,10 +327,12 @@
             <td>
               <button onclick="editPatient('${objectId}')">Edit</button>
               <button onclick="dischargePatient('${objectId}', this)">Discharge</button>
+              <button onclick="printMeds('${objectId}')">Print Meds</button>
+              <button onclick="openMedicationsModal('${objectId}')">Medications</button>
             </td>
           `;
           
-          // Append row to the corresponding ward table
+          // Append row to the corresponding ward table based on the "ward" field
           if (ward.toLowerCase() === "ward a") {
             document.querySelector("#tableWardA tbody").appendChild(tr);
           } else if (ward.toLowerCase() === "ward b") {
@@ -258,16 +357,169 @@
       const query = new Parse.Query(Patient);
       try {
         const patient = await query.get(patientId);
-        // Set a "discharged" flag (you may also choose to delete or archive the record)
         patient.set("discharged", true);
         await patient.save();
-        // Update the row style to indicate discharge
         const row = button.parentNode.parentNode;
         row.style.backgroundColor = "#f8d7da";
         alert("Patient marked as discharged.");
       } catch (error) {
         alert("Error discharging patient: " + error.message);
       }
+    }
+    
+    // New function: Print medications list for a patient
+    async function printMeds(patientId) {
+      const Patient = Parse.Object.extend("Patient");
+      const query = new Parse.Query(Patient);
+      try {
+        const patient = await query.get(patientId);
+        const medications = patient.get("medications") || [];
+        let htmlContent = `<html><head><title>Medications for ${patient.get("name")}</title></head><body>`;
+        htmlContent += `<h2>Medications for ${patient.get("name")}</h2>`;
+        if (medications.length === 0) {
+          htmlContent += `<p>No medications found.</p>`;
+        } else {
+          htmlContent += `<table border="1" style="width:100%; border-collapse:collapse;">
+                            <thead>
+                              <tr>
+                                <th>Medication Name</th>
+                                <th>Dose</th>
+                                <th>Frequency</th>
+                              </tr>
+                            </thead>
+                            <tbody>`;
+          medications.forEach(med => {
+            htmlContent += `<tr>
+                              <td>${med.medName}</td>
+                              <td>${med.dose}</td>
+                              <td>${med.frequency}</td>
+                            </tr>`;
+          });
+          htmlContent += `</tbody></table>`;
+        }
+        htmlContent += `</body></html>`;
+        const printWindow = window.open("", "", "height=600,width=800");
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+      } catch (error) {
+        alert("Error printing medications: " + error.message);
+      }
+    }
+    
+    // New function: Open medications modal for editing and printing
+    async function openMedicationsModal(patientId) {
+      currentPatientIdForMedications = patientId;
+      const Patient = Parse.Object.extend("Patient");
+      const query = new Parse.Query(Patient);
+      try {
+        currentPatientRecord = await query.get(patientId);
+        const medications = currentPatientRecord.get("medications") || [];
+        // Clear modal table body
+        const modalTbody = document.querySelector("#modalMedicationTable tbody");
+        modalTbody.innerHTML = "";
+        // Populate modal with current medications
+        medications.forEach(med => {
+          const row = modalTbody.insertRow();
+          row.insertCell(0).innerHTML = `<input type="text" name="modalMedName[]" value="${med.medName}" required>`;
+          row.insertCell(1).innerHTML = `<input type="text" name="modalDose[]" value="${med.dose}" required>`;
+          row.insertCell(2).innerHTML = `<input type="text" name="modalFrequency[]" value="${med.frequency}" required>`;
+          row.insertCell(3).innerHTML = `<button type="button" onclick="removeModalMedicationRow(this)">Remove</button>`;
+        });
+        // Show modal
+        document.getElementById("medicationsModal").style.display = "block";
+      } catch (error) {
+        alert("Error fetching medications: " + error.message);
+      }
+    }
+    
+    // Close medications modal
+    function closeMedicationsModal() {
+      document.getElementById("medicationsModal").style.display = "none";
+    }
+    
+    // Add new medication row in modal
+    function addModalMedicationRow() {
+      const modalTbody = document.querySelector("#modalMedicationTable tbody");
+      const row = modalTbody.insertRow();
+      row.insertCell(0).innerHTML = `<input type="text" name="modalMedName[]" required>`;
+      row.insertCell(1).innerHTML = `<input type="text" name="modalDose[]" required>`;
+      row.insertCell(2).innerHTML = `<input type="text" name="modalFrequency[]" required>`;
+      row.insertCell(3).innerHTML = `<button type="button" onclick="removeModalMedicationRow(this)">Remove</button>`;
+    }
+    
+    // Remove a medication row from modal
+    function removeModalMedicationRow(button) {
+      const row = button.parentNode.parentNode;
+      row.parentNode.removeChild(row);
+    }
+    
+    // Save updated medications from modal back to Back4App
+    async function saveMedications() {
+      const modalTbody = document.querySelector("#modalMedicationTable tbody");
+      const rows = modalTbody.rows;
+      const updatedMedications = [];
+      for (let i = 0; i < rows.length; i++) {
+        const medName = rows[i].cells[0].querySelector("input").value.trim();
+        const dose = rows[i].cells[1].querySelector("input").value.trim();
+        const frequency = rows[i].cells[2].querySelector("input").value.trim();
+        if (medName && dose && frequency) {
+          updatedMedications.push({ medName, dose, frequency });
+        }
+      }
+      if (!currentPatientRecord) {
+        alert("Patient record not loaded.");
+        return;
+      }
+      currentPatientRecord.set("medications", updatedMedications);
+      try {
+        await currentPatientRecord.save();
+        alert("Medications updated successfully!");
+        closeMedicationsModal();
+        // Optionally, refresh the patients list to reflect changes
+        loadPatients();
+      } catch (error) {
+        alert("Error saving medications: " + error.message);
+      }
+    }
+    
+    // Print medications from within the modal
+    function printModalMedications() {
+      // Build HTML content from modal table data
+      const modalTbody = document.querySelector("#modalMedicationTable tbody");
+      let htmlContent = `<html><head><title>Medications</title></head><body>`;
+      htmlContent += `<h2>Medications</h2>`;
+      if (modalTbody.rows.length === 0) {
+        htmlContent += `<p>No medications to print.</p>`;
+      } else {
+        htmlContent += `<table border="1" style="width:100%; border-collapse:collapse;">
+                          <thead>
+                            <tr>
+                              <th>Medication Name</th>
+                              <th>Dose</th>
+                              <th>Frequency</th>
+                            </tr>
+                          </thead>
+                          <tbody>`;
+        for (let i = 0; i < modalTbody.rows.length; i++) {
+          const medName = modalTbody.rows[i].cells[0].querySelector("input").value.trim();
+          const dose = modalTbody.rows[i].cells[1].querySelector("input").value.trim();
+          const frequency = modalTbody.rows[i].cells[2].querySelector("input").value.trim();
+          htmlContent += `<tr>
+                            <td>${medName}</td>
+                            <td>${dose}</td>
+                            <td>${frequency}</td>
+                          </tr>`;
+        }
+        htmlContent += `</tbody></table>`;
+      }
+      htmlContent += `</body></html>`;
+      const printWindow = window.open("", "", "height=600,width=800");
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
     }
     
     // Load patients when the page loads
