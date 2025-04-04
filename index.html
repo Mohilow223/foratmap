@@ -6,6 +6,8 @@
   <title>Hospital EMR Login</title>
   <!-- Using Google Fonts for a modern look -->
   <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
+  <!-- Include Parse SDK -->
+  <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
   <style>
     /* Modern, minimal style for the login page */
     body {
@@ -77,29 +79,33 @@
     </form>
   </div>
   <script>
-    // Client-side login logic for demonstration only
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-      e.preventDefault(); // Prevent the default form submission
+    // Initialize Parse with your Back4App credentials
+    Parse.initialize("JntBzRh42hSe74SIbVM1CQZr2D51YcVbDKcH60m6", "yxn7Yup1UUZildFxcG8a0gmZmUBFEkBwD6gfP702");
+    Parse.serverURL = 'https://parseapi.back4app.com/';
+
+    // Login function using Parse.User.logIn to verify credentials
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
       var username = document.getElementById('username').value.trim();
       var password = document.getElementById('password').value.trim();
       
-      // Debugging: log the username and password to the console
-      console.log("Username entered: " + username);
-      console.log("Password entered: " + password);
-      
-      // Check for empty fields
       if (username === "" || password === "") {
         alert("Please fill in all fields.");
         return;
       }
       
-      // Check for admin credentials
-      if (username === "mhh" && password === "123") {
-        console.log("Admin credentials verified.");
-        window.location.href = "dashboard.html"; // Redirect to admin dashboard
-      } else {
-        console.log("Non-admin login; redirecting to patient map.");
-        window.location.href = "patientMap.html"; // Redirect to patient map for non-admin
+      try {
+        // Attempt to log in with Parse
+        const user = await Parse.User.logIn(username, password);
+        // If the user has a role and it equals "admin" (case insensitive), redirect to the dashboard.
+        if (user.get("role") && user.get("role").toLowerCase() === "admin") {
+          window.location.href = "dashboard.html";
+        } else {
+          window.location.href = "patientMap.html";
+        }
+      } catch (error) {
+        // Display an error message if login fails
+        alert("Login failed: " + error.message);
       }
     });
   </script>
