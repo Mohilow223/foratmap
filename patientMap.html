@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Patient Map</title>
+  <!-- Include Parse SDK -->
+  <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -15,9 +17,6 @@
       background-color: #007BFF;
       color: #fff;
       padding: 20px;
-    }
-    header h1 {
-      margin: 0 0 10px;
       text-align: center;
     }
     .header-flex {
@@ -25,6 +24,7 @@
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
+      padding: 0 20px;
     }
     .tabs {
       display: flex;
@@ -64,6 +64,7 @@
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
+    /* Responsive table container */
     .table-container {
       overflow-x: auto;
     }
@@ -120,7 +121,7 @@
   <div id="WardA" class="tabcontent">
     <h2>Ward A</h2>
     <div class="table-container">
-      <table>
+      <table id="tableWardA">
         <thead>
           <tr>
             <th>Patient Name</th>
@@ -131,17 +132,7 @@
           </tr>
         </thead>
         <tbody>
-          <!-- Example row; you can add more rows as needed -->
-          <tr>
-            <td>John Doe</td>
-            <td>Dr. Smith</td>
-            <td>101</td>
-            <td>Flu</td>
-            <td>
-              <button onclick="editPatient(this)">Edit</button>
-              <button onclick="dischargePatient(this)">Discharge</button>
-            </td>
-          </tr>
+          <!-- Patient rows will be inserted here -->
         </tbody>
       </table>
     </div>
@@ -151,7 +142,7 @@
   <div id="WardB" class="tabcontent" style="display:none;">
     <h2>Ward B</h2>
     <div class="table-container">
-      <table>
+      <table id="tableWardB">
         <thead>
           <tr>
             <th>Patient Name</th>
@@ -162,7 +153,7 @@
           </tr>
         </thead>
         <tbody>
-          <!-- Patient rows for Ward B -->
+          <!-- Patient rows will be inserted here -->
         </tbody>
       </table>
     </div>
@@ -172,7 +163,7 @@
   <div id="WardC" class="tabcontent" style="display:none;">
     <h2>Ward C</h2>
     <div class="table-container">
-      <table>
+      <table id="tableWardC">
         <thead>
           <tr>
             <th>Patient Name</th>
@@ -183,14 +174,18 @@
           </tr>
         </thead>
         <tbody>
-          <!-- Patient rows for Ward C -->
+          <!-- Patient rows will be inserted here -->
         </tbody>
       </table>
     </div>
   </div>
   
   <script>
-    // Function for switching tabs between wards
+    // Initialize Parse with your Back4App credentials
+    Parse.initialize("JntBzRh42hSe74SIbVM1CQZr2D51YcVbDKcH60m6", "yxn7Yup1UUZildFxcG8a0gmZmUBFEkBwD6gfP702");
+    Parse.serverURL = 'https://parseapi.back4app.com/';
+    
+    // Function to switch between ward tabs
     function openWard(evt, wardName) {
       var i, tabcontent, tablinks;
       tabcontent = document.getElementsByClassName("tabcontent");
@@ -204,30 +199,79 @@
       document.getElementById(wardName).style.display = "block";
       evt.currentTarget.classList.add("active");
     }
-
-    // Edit patient function: extracts patient details and redirects to the Edit Patient page
-    function editPatient(btn) {
-      var row = btn.parentNode.parentNode;
-      var cells = row.getElementsByTagName("td");
-      var name = cells[0].innerText;
-      var doctor = cells[1].innerText;
-      var room = cells[2].innerText;
-      var dx = cells[3].innerText;
-      
-      // Redirect to editPatient.html with query parameters for pre-population
-      var url = "editPatient.html?name=" + encodeURIComponent(name) +
-                "&doctor=" + encodeURIComponent(doctor) +
-                "&room=" + encodeURIComponent(room) +
-                "&dx=" + encodeURIComponent(dx);
-      window.location.href = url;
+    
+    // Load patients from Back4App and display them in the appropriate ward table
+    async function loadPatients() {
+      const Patient = Parse.Object.extend("Patient");
+      const query = new Parse.Query(Patient);
+      try {
+        const results = await query.find();
+        // Clear existing table rows in each ward
+        document.querySelectorAll("table tbody").forEach(tbody => tbody.innerHTML = "");
+        // Loop through each patient record
+        results.forEach(patient => {
+          // Assume the patient record includes a "ward" field.
+          // Default to "Ward A" if not present.
+          let ward = patient.get("ward") || "Ward A";
+          // Get patient details
+          const name = patient.get("name") || "";
+          const doctor = patient.get("doctor") || "";
+          const roomNumber = patient.get("roomNumber") || "";
+          const diagnosis = patient.get("diagnosis") || "";
+          const objectId = patient.id;
+          
+          // Create a new table row
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${name}</td>
+            <td>${doctor}</td>
+            <td>${roomNumber}</td>
+            <td>${diagnosis}</td>
+            <td>
+              <button onclick="editPatient('${objectId}')">Edit</button>
+              <button onclick="dischargePatient('${objectId}', this)">Discharge</button>
+            </td>
+          `;
+          
+          // Append row to the corresponding ward table
+          if (ward.toLowerCase() === "ward a") {
+            document.querySelector("#tableWardA tbody").appendChild(tr);
+          } else if (ward.toLowerCase() === "ward b") {
+            document.querySelector("#tableWardB tbody").appendChild(tr);
+          } else if (ward.toLowerCase() === "ward c") {
+            document.querySelector("#tableWardC tbody").appendChild(tr);
+          }
+        });
+      } catch (error) {
+        console.error("Error loading patients: ", error);
+      }
     }
-
-    // Dummy function for discharging a patient
-    function dischargePatient(btn) {
-      var row = btn.parentNode.parentNode;
-      row.style.backgroundColor = "#f8d7da"; // Visual cue for discharged patient
-      alert("Patient marked as discharged.");
+    
+    // Redirect to editPatient.html using the patient objectId as a query parameter
+    function editPatient(patientId) {
+      window.location.href = "editPatient.html?id=" + encodeURIComponent(patientId);
     }
+    
+    // Discharge patient: mark the patient as discharged on Back4App and update the row style
+    async function dischargePatient(patientId, button) {
+      const Patient = Parse.Object.extend("Patient");
+      const query = new Parse.Query(Patient);
+      try {
+        const patient = await query.get(patientId);
+        // Set a "discharged" flag (you may also choose to delete or archive the record)
+        patient.set("discharged", true);
+        await patient.save();
+        // Update the row style to indicate discharge
+        const row = button.parentNode.parentNode;
+        row.style.backgroundColor = "#f8d7da";
+        alert("Patient marked as discharged.");
+      } catch (error) {
+        alert("Error discharging patient: " + error.message);
+      }
+    }
+    
+    // Load patients when the page loads
+    window.onload = loadPatients;
   </script>
 </body>
 </html>
