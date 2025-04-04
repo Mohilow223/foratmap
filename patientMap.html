@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Map</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Patient Map</h1>
+    <nav>
+      <button onclick="window.location.href='addPatient.html'">Add Patient</button>
+    </nav>
+  </header>
+  <div class="tabs">
+    <button class="tablink" onclick="openWard(event, 'WardA')">Ward A</button>
+    <button class="tablink" onclick="openWard(event, 'WardB')">Ward B</button>
+    <button class="tablink" onclick="openWard(event, 'WardC')">Ward C</button>
+  </div>
+  <!-- Ward A Content -->
+  <div id="WardA" class="tabcontent">
+    <h2>Ward A</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Patient Name</th>
+          <th>Treating Doctor</th>
+          <th>Room Number</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Example row -->
+        <tr>
+          <td>John Doe</td>
+          <td>Dr. Smith</td>
+          <td>101</td>
+          <td>
+            <button onclick="editPatient(this)">Edit</button>
+            <button onclick="dischargePatient(this)">Discharge</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <!-- Ward B Content -->
+  <div id="WardB" class="tabcontent" style="display:none;">
+    <h2>Ward B</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Patient Name</th>
+          <th>Treating Doctor</th>
+          <th>Room Number</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Patient rows for Ward B -->
+      </tbody>
+    </table>
+  </div>
+  <!-- Ward C Content -->
+  <div id="WardC" class="tabcontent" style="display:none;">
+    <h2>Ward C</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Patient Name</th>
+          <th>Treating Doctor</th>
+          <th>Room Number</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Patient rows for Ward C -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // Function for switching tabs between wards
+    function openWard(evt, wardName) {
+      var i, tabcontent, tablinks;
+      tabcontent = document.getElementsByClassName("tabcontent");
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+      }
+      tablinks = document.getElementsByClassName("tablink");
+      for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].classList.remove("active");
+      }
+      document.getElementById(wardName).style.display = "block";
+      evt.currentTarget.classList.add("active");
+    }
+
+    // Dummy functions for patient actions
+    function editPatient(btn) {
+      // Code to edit patient details could be implemented here
+      alert("Edit patient functionality to be implemented.");
+    }
+
+    function dischargePatient(btn) {
+      // Code to mark a patient as discharged
+      var row = btn.parentNode.parentNode;
+      row.style.backgroundColor = "#f8d7da"; // Visual cue for discharged patient
+      alert("Patient marked as discharged.");
+    }
+  </script>
+</body>
+</html>
