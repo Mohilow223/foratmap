@@ -4,7 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit Patient</title>
+  <!-- Include Parse SDK -->
+  <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
   <style>
+    /* Global styles for the page */
     body {
       font-family: Arial, sans-serif;
       background-color: #f5f5f5;
@@ -45,6 +48,7 @@
     textarea {
       resize: vertical;
     }
+    /* Checkbox group styling */
     .checkbox-group {
       display: flex;
       flex-wrap: wrap;
@@ -57,6 +61,7 @@
       gap: 5px;
       font-weight: normal;
     }
+    /* Button group styling */
     .button-group {
       display: flex;
       justify-content: space-between;
@@ -76,6 +81,7 @@
     .go-back-btn {
       background-color: #6c757d;
     }
+    /* Medication section styling */
     .medication-section {
       margin-top: 20px;
     }
@@ -105,7 +111,7 @@
   <header>
     <h1>Edit Patient</h1>
   </header>
-  <form id="editPatientForm" action="patientMap.html" method="POST">
+  <form id="editPatientForm">
     <div class="form-group">
       <label for="patientName">Name:</label>
       <input type="text" id="patientName" name="patientName" required>
@@ -186,27 +192,82 @@
   </form>
 
   <script>
-    // Populate the form with query parameters passed from the Patient Map page
-    function populateForm() {
-      const params = new URLSearchParams(window.location.search);
-      const name = params.get('name');
-      const doctor = params.get('doctor');
-      const room = params.get('room');
-      const dx = params.get('dx');
-      
-      if (name) {
-        document.getElementById('patientName').value = name;
+    // Initialize Parse with your Back4App credentials
+    Parse.initialize("JntBzRh42hSe74SIbVM1CQZr2D51YcVbDKcH60m6", "yxn7Yup1UUZildFxcG8a0gmZmUBFEkBwD6gfP702");
+    Parse.serverURL = 'https://parseapi.back4app.com/';
+
+    let patientRecord = null; // Global variable to hold the fetched patient record
+
+    // Utility function to get query parameters
+    function getQueryParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+
+    // Populate the form by fetching the patient record from Back4App using the provided id
+    async function populateForm() {
+      const patientId = getQueryParam("id");
+      if (!patientId) {
+        alert("No patient ID provided.");
+        return;
       }
-      if (doctor) {
-        document.getElementById('doctor').value = doctor;
+      const Patient = Parse.Object.extend("Patient");
+      const query = new Parse.Query(Patient);
+      try {
+        patientRecord = await query.get(patientId);
+        // Populate basic fields
+        document.getElementById("patientName").value = patientRecord.get("name") || "";
+        document.getElementById("patientAge").value = patientRecord.get("age") || "";
+        document.getElementById("doctor").value = patientRecord.get("doctor") || "";
+        document.getElementById("roomNumber").value = patientRecord.get("roomNumber") || "";
+        document.getElementById("diagnosis").value = patientRecord.get("diagnosis") || "";
+        document.getElementById("rotaterNote").value = patientRecord.get("rotaterNote") || "";
+
+        // Populate PMHx checkboxes and "Other"
+        const pmhxFixed = ["COPD", "HF", "HTN", "IHD", "DM", "Asthma"];
+        const pmhxData = patientRecord.get("pmhx") || [];
+        const pmhxOtherArr = [];
+        pmhxData.forEach(function(item) {
+          if (pmhxFixed.includes(item)) {
+            const checkbox = document.querySelector("input[name='pmhx[]'][value='" + item + "']");
+            if (checkbox) checkbox.checked = true;
+          } else {
+            pmhxOtherArr.push(item);
+          }
+        });
+        document.getElementById("pmhxOther").value = pmhxOtherArr.join(", ");
+
+        // Populate PSHx checkboxes and "Other"
+        const pshxFixed = ["Cholecystectomy", "Appendectomy", "C/S"];
+        const pshxData = patientRecord.get("pshx") || [];
+        const pshxOtherArr = [];
+        pshxData.forEach(function(item) {
+          if (pshxFixed.includes(item)) {
+            const checkbox = document.querySelector("input[name='pshx[]'][value='" + item + "']");
+            if (checkbox) checkbox.checked = true;
+          } else {
+            pshxOtherArr.push(item);
+          }
+        });
+        document.getElementById("pshxOther").value = pshxOtherArr.join(", ");
+
+        // Populate medications table if data exists
+        const medications = patientRecord.get("medications") || [];
+        if (medications.length > 0) {
+          document.getElementById("medicationsTable").style.display = "block";
+          const tableBody = document.getElementById("medicationDetails").getElementsByTagName("tbody")[0];
+          tableBody.innerHTML = "";
+          medications.forEach(function(med) {
+            const row = tableBody.insertRow();
+            row.insertCell(0).innerHTML = "<input type='text' name='medName[]' value='" + med.medName + "' required>";
+            row.insertCell(1).innerHTML = "<input type='text' name='dose[]' value='" + med.dose + "' required>";
+            row.insertCell(2).innerHTML = "<input type='text' name='frequency[]' value='" + med.frequency + "' required>";
+            row.insertCell(3).innerHTML = "<button type='button' onclick='removeMedicationRow(this)'>Remove</button>";
+          });
+        }
+      } catch (error) {
+        alert("Error fetching patient data: " + error.message);
       }
-      if (room) {
-        document.getElementById('roomNumber').value = room;
-      }
-      if (dx) {
-        document.getElementById('diagnosis').value = dx;
-      }
-      // Additional fields like patientAge, PMHx, PSHx, and rotaterNote remain blank unless provided
     }
 
     // Toggle the visibility of the medication table
@@ -217,38 +278,44 @@
 
     // Dynamically add a new medication row
     function addMedicationRow() {
-      var tableBody = document.getElementById("medicationDetails").getElementsByTagName('tbody')[0];
-      var row = tableBody.insertRow();
+      const tableBody = document.getElementById("medicationDetails").getElementsByTagName("tbody")[0];
+      const row = tableBody.insertRow();
       
-      var cell1 = row.insertCell(0);
-      var medName = document.createElement("input");
+      const cell1 = row.insertCell(0);
+      const medName = document.createElement("input");
       medName.type = "text";
       medName.name = "medName[]";
       medName.required = true;
       cell1.appendChild(medName);
       
-      var cell2 = row.insertCell(1);
-      var dose = document.createElement("input");
+      const cell2 = row.insertCell(1);
+      const dose = document.createElement("input");
       dose.type = "text";
       dose.name = "dose[]";
       dose.required = true;
       cell2.appendChild(dose);
       
-      var cell3 = row.insertCell(2);
-      var frequency = document.createElement("input");
+      const cell3 = row.insertCell(2);
+      const frequency = document.createElement("input");
       frequency.type = "text";
       frequency.name = "frequency[]";
       frequency.required = true;
       cell3.appendChild(frequency);
       
-      var cell4 = row.insertCell(3);
-      var removeButton = document.createElement("button");
+      const cell4 = row.insertCell(3);
+      const removeButton = document.createElement("button");
       removeButton.type = "button";
       removeButton.textContent = "Remove";
       removeButton.onclick = function() {
-        tableBody.removeChild(row);
+        removeMedicationRow(removeButton);
       };
       cell4.appendChild(removeButton);
+    }
+
+    // Remove a medication row
+    function removeMedicationRow(button) {
+      const row = button.parentNode.parentNode;
+      row.parentNode.removeChild(row);
     }
 
     // Go back to the previous page
@@ -256,7 +323,76 @@
       window.history.back();
     }
 
-    // Initialize the form on page load
+    // Handle form submission: Update patient details on Back4App
+    document.getElementById("editPatientForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      // Gather form data
+      const name = document.getElementById("patientName").value.trim();
+      const age = document.getElementById("patientAge").value.trim();
+      const doctor = document.getElementById("doctor").value.trim();
+      const roomNumber = document.getElementById("roomNumber").value.trim();
+      const diagnosis = document.getElementById("diagnosis").value.trim();
+      const rotaterNote = document.getElementById("rotaterNote").value.trim();
+
+      // Process PMHx checkboxes and other input
+      let pmhx = [];
+      document.querySelectorAll("input[name='pmhx[]']:checked").forEach(function(el) {
+        pmhx.push(el.value);
+      });
+      const pmhxOther = document.getElementById("pmhxOther").value.trim();
+      if(pmhxOther) {
+        pmhx = pmhx.concat(pmhxOther.split(",").map(item => item.trim()).filter(item => item));
+      }
+
+      // Process PSHx checkboxes and other input
+      let pshx = [];
+      document.querySelectorAll("input[name='pshx[]']:checked").forEach(function(el) {
+        pshx.push(el.value);
+      });
+      const pshxOther = document.getElementById("pshxOther").value.trim();
+      if(pshxOther) {
+        pshx = pshx.concat(pshxOther.split(",").map(item => item.trim()).filter(item => item));
+      }
+
+      // Process medication rows
+      const medications = [];
+      const tableBody = document.getElementById("medicationDetails").getElementsByTagName("tbody")[0];
+      for (let i = 0; i < tableBody.rows.length; i++) {
+        const row = tableBody.rows[i];
+        const medName = row.cells[0].querySelector("input").value.trim();
+        const dose = row.cells[1].querySelector("input").value.trim();
+        const frequency = row.cells[2].querySelector("input").value.trim();
+        if (medName && dose && frequency) {
+          medications.push({ medName, dose, frequency });
+        }
+      }
+
+      // Update patient record fields
+      if (!patientRecord) {
+        alert("Patient record not loaded.");
+        return;
+      }
+      patientRecord.set("name", name);
+      patientRecord.set("age", age);
+      patientRecord.set("doctor", doctor);
+      patientRecord.set("roomNumber", roomNumber);
+      patientRecord.set("diagnosis", diagnosis);
+      patientRecord.set("rotaterNote", rotaterNote);
+      patientRecord.set("pmhx", pmhx);
+      patientRecord.set("pshx", pshx);
+      patientRecord.set("medications", medications);
+
+      try {
+        await patientRecord.save();
+        alert("Patient details updated successfully!");
+        window.location.href = "patientMap.html";
+      } catch (error) {
+        alert("Error updating patient details: " + error.message);
+      }
+    });
+
+    // Initialize the form when the page loads
     window.onload = populateForm;
   </script>
 </body>
