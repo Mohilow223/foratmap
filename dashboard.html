@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard</title>
+  <!-- Include Parse SDK -->
+  <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
   <style>
     /* Global Styles */
     body {
@@ -160,11 +162,43 @@
   </section>
   
   <script>
+    // Initialize Parse with your Back4App credentials
+    Parse.initialize("JntBzRh42hSe74SIbVM1CQZr2D51YcVbDKcH60m6", "yxn7Yup1UUZildFxcG8a0gmZmUBFEkBwD6gfP702");
+    Parse.serverURL = 'https://parseapi.back4app.com/';
+
+    // Function to load users from Back4App
+    async function loadUsers() {
+      const User = Parse.Object.extend("_User");
+      const query = new Parse.Query(User);
+      try {
+        const results = await query.find();
+        const userTableBody = document.getElementById("userTable").getElementsByTagName("tbody")[0];
+        userTableBody.innerHTML = ""; // Clear table
+        results.forEach(user => {
+          const username = user.get("username");
+          const role = user.get("role") || "N/A";
+          const row = userTableBody.insertRow();
+          const cell1 = row.insertCell(0);
+          const cell2 = row.insertCell(1);
+          cell1.innerText = username;
+          cell2.innerText = role;
+        });
+      } catch (error) {
+        console.error("Error while fetching users: ", error);
+      }
+    }
+
+    // Load users and draw chart on page load
+    window.onload = function() {
+      loadUsers();
+      drawChart();
+    };
+
     /* User Management: Add User Functionality */
-    document.getElementById("addUserForm").addEventListener("submit", function(e) {
+    document.getElementById("addUserForm").addEventListener("submit", async function(e) {
       e.preventDefault();
       var username = document.getElementById("newUsername").value.trim();
-      var password = document.getElementById("newPassword").value.trim(); // In production, passwords should be hashed and stored securely.
+      var password = document.getElementById("newPassword").value.trim();
       var role = document.getElementById("newUserRole").value;
       
       if (username === "" || password === "" || role === "") {
@@ -172,22 +206,25 @@
         return;
       }
       
-      // Append new user to the table
-      var userTableBody = document.getElementById("userTable").getElementsByTagName("tbody")[0];
-      var row = userTableBody.insertRow();
-      var cell1 = row.insertCell(0);
-      var cell2 = row.insertCell(1);
-      cell1.innerText = username;
-      cell2.innerText = role;
-      
-      // Clear the form fields
-      document.getElementById("newUsername").value = "";
-      document.getElementById("newPassword").value = "";
-      document.getElementById("newUserRole").value = "";
-      
-      alert("User added successfully!");
+      // Create a new Parse.User object and sign up
+      const user = new Parse.User();
+      user.set("username", username);
+      user.set("password", password);
+      user.set("role", role);
+      try {
+        await user.signUp();
+        alert("User added successfully!");
+        // Clear the form fields
+        document.getElementById("newUsername").value = "";
+        document.getElementById("newPassword").value = "";
+        document.getElementById("newUserRole").value = "";
+        // Reload users list
+        loadUsers();
+      } catch (error) {
+        alert("Error: " + error.message);
+      }
     });
-    
+
     /* Data Trends by Wards: Simple Bar Chart using Canvas */
     function drawChart() {
       var canvas = document.getElementById("trendChart");
@@ -196,7 +233,7 @@
         // Clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Sample data trends by wards
+        // Sample data trends by wards (replace with dynamic data if available)
         var data = {
           "Ward A": 120,
           "Ward B": 80,
@@ -230,9 +267,6 @@
         }
       }
     }
-    
-    // Draw the chart when the page loads
-    window.onload = drawChart;
   </script>
 </body>
 </html>
