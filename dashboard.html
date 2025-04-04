@@ -4,47 +4,235 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Global Styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+    header {
+      background-color: #007BFF;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+    section {
+      padding: 20px;
+      margin: 20px;
+      background: #fff;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      margin-top: 0;
+    }
+    /* Overview Section */
+    .metrics {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+    }
+    .metric {
+      background-color: #e9ecef;
+      padding: 15px;
+      border-radius: 5px;
+      flex: 1;
+      margin: 10px;
+      text-align: center;
+    }
+    /* User Management Section */
+    .user-management form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .user-management input[type="text"],
+    .user-management input[type="password"],
+    .user-management select {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      flex: 1;
+    }
+    .user-management button {
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .user-management button:hover {
+      background-color: #218838;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #007BFF;
+      color: #fff;
+    }
+    /* Data Trends Chart */
+    .chart-container {
+      text-align: center;
+    }
+    canvas {
+      max-width: 100%;
+      height: auto;
+    }
+    @media (max-width: 600px) {
+      .metrics {
+        flex-direction: column;
+      }
+    }
+  </style>
 </head>
 <body>
   <header>
     <h1>Admin Dashboard</h1>
   </header>
+  
+  <!-- System Overview Section -->
   <section class="overview">
     <h2>System Overview</h2>
-    <p>Display key metrics and system data here.</p>
-    <!-- Example metric boxes -->
     <div class="metrics">
       <div class="metric">
         <h3>Total Patients</h3>
-        <p>120</p>
+        <p id="totalPatients">120</p>
       </div>
       <div class="metric">
         <h3>Active Wards</h3>
-        <p>3</p>
+        <p id="activeWards">3</p>
       </div>
       <div class="metric">
         <h3>Pending Discharges</h3>
-        <p>5</p>
+        <p id="pendingDischarges">5</p>
       </div>
     </div>
   </section>
-  <section class="admin-controls">
-    <h2>Administrative Controls</h2>
-    <button onclick="manageUsers()">Manage Users</button>
-    <button onclick="systemSettings()">System Settings</button>
+  
+  <!-- User Management Section -->
+  <section class="user-management">
+    <h2>User Management</h2>
+    <form id="addUserForm">
+      <input type="text" id="newUsername" placeholder="Username" required>
+      <input type="password" id="newPassword" placeholder="Password" required>
+      <select id="newUserRole" required>
+        <option value="">Select Role</option>
+        <option value="admin">Admin</option>
+        <option value="doctor">Doctor</option>
+        <option value="nurse">Nurse</option>
+      </select>
+      <button type="submit">Add User</button>
+    </form>
+    <table id="userTable">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Role</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Dynamically added user rows -->
+      </tbody>
+    </table>
   </section>
-
+  
+  <!-- Data Trends Section -->
+  <section class="data-trends">
+    <h2>Data Trends by Wards</h2>
+    <div class="chart-container">
+      <canvas id="trendChart" width="600" height="300"></canvas>
+    </div>
+  </section>
+  
   <script>
-    function manageUsers() {
-      // Placeholder for managing user accounts
-      alert("User management functionality to be implemented.");
+    /* User Management: Add User Functionality */
+    document.getElementById("addUserForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      var username = document.getElementById("newUsername").value.trim();
+      var password = document.getElementById("newPassword").value.trim(); // In production, passwords should be hashed and stored securely.
+      var role = document.getElementById("newUserRole").value;
+      
+      if (username === "" || password === "" || role === "") {
+        alert("Please fill in all fields.");
+        return;
+      }
+      
+      // Append new user to the table
+      var userTableBody = document.getElementById("userTable").getElementsByTagName("tbody")[0];
+      var row = userTableBody.insertRow();
+      var cell1 = row.insertCell(0);
+      var cell2 = row.insertCell(1);
+      cell1.innerText = username;
+      cell2.innerText = role;
+      
+      // Clear the form fields
+      document.getElementById("newUsername").value = "";
+      document.getElementById("newPassword").value = "";
+      document.getElementById("newUserRole").value = "";
+      
+      alert("User added successfully!");
+    });
+    
+    /* Data Trends by Wards: Simple Bar Chart using Canvas */
+    function drawChart() {
+      var canvas = document.getElementById("trendChart");
+      if (canvas.getContext) {
+        var ctx = canvas.getContext("2d");
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Sample data trends by wards
+        var data = {
+          "Ward A": 120,
+          "Ward B": 80,
+          "Ward C": 50
+        };
+        
+        // Determine maximum value to scale bars
+        var maxVal = Math.max(...Object.values(data));
+        var padding = 40;
+        var barWidth = (canvas.width - 2 * padding) / Object.keys(data).length - 20;
+        var x = padding;
+        
+        // Draw each bar
+        for (var ward in data) {
+          var barHeight = (data[ward] / maxVal) * (canvas.height - 2 * padding);
+          
+          // Draw bar
+          ctx.fillStyle = "#007BFF";
+          ctx.fillRect(x, canvas.height - padding - barHeight, barWidth, barHeight);
+          
+          // Add text label for the ward
+          ctx.fillStyle = "#000";
+          ctx.font = "16px Arial";
+          ctx.textAlign = "center";
+          ctx.fillText(ward, x + barWidth / 2, canvas.height - padding + 20);
+          
+          // Add text for the value on top of the bar
+          ctx.fillText(data[ward], x + barWidth / 2, canvas.height - padding - barHeight - 10);
+          
+          x += barWidth + 20; // Gap between bars
+        }
+      }
     }
-
-    function systemSettings() {
-      // Placeholder for system settings functionality
-      alert("System settings functionality to be implemented.");
-    }
+    
+    // Draw the chart when the page loads
+    window.onload = drawChart;
   </script>
 </body>
 </html>
