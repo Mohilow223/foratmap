@@ -44,11 +44,9 @@
       background-color: #007BFF;
       color: #fff;
     }
-    .add-patient-container {
-      /* Container for the Add Patient button */
-    }
+    .add-patient-container { }
     .add-patient-btn {
-      background-color: #28a745; /* Distinct green color */
+      background-color: #28a745;
       color: #fff;
       border: none;
       padding: 10px 20px;
@@ -66,7 +64,6 @@
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    /* Responsive table container */
     .table-container {
       overflow-x: auto;
     }
@@ -85,7 +82,6 @@
       background-color: #007BFF;
       color: #fff;
     }
-    /* Mobile adjustments */
     @media (max-width: 600px) {
       .tablink {
         padding: 8px 16px;
@@ -135,6 +131,7 @@
           </tr>
         </thead>
         <tbody>
+          <!-- Example row; you can add more rows as needed -->
           <tr>
             <td>John Doe</td>
             <td>Dr. Smith</td>
@@ -208,11 +205,24 @@
       evt.currentTarget.classList.add("active");
     }
 
-    // Dummy functions for patient actions
+    // Edit patient function: extracts patient details and redirects to the Edit Patient page
     function editPatient(btn) {
-      alert("Edit patient functionality to be implemented.");
+      var row = btn.parentNode.parentNode;
+      var cells = row.getElementsByTagName("td");
+      var name = cells[0].innerText;
+      var doctor = cells[1].innerText;
+      var room = cells[2].innerText;
+      var dx = cells[3].innerText;
+      
+      // Redirect to editPatient.html with query parameters for pre-population
+      var url = "editPatient.html?name=" + encodeURIComponent(name) +
+                "&doctor=" + encodeURIComponent(doctor) +
+                "&room=" + encodeURIComponent(room) +
+                "&dx=" + encodeURIComponent(dx);
+      window.location.href = url;
     }
 
+    // Dummy function for discharging a patient
     function dischargePatient(btn) {
       var row = btn.parentNode.parentNode;
       row.style.backgroundColor = "#f8d7da"; // Visual cue for discharged patient
