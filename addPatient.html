@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Add Patient</title>
+  <!-- Include Parse SDK -->
+  <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
   <style>
     /* Global styles for the page */
     body {
@@ -109,7 +111,7 @@
   <header>
     <h1>Add New Patient</h1>
   </header>
-  <form id="addPatientForm" action="patientMap.html" method="POST">
+  <form id="addPatientForm">
     <div class="form-group">
       <label for="patientName">Name:</label>
       <input type="text" id="patientName" name="patientName" required>
@@ -190,6 +192,10 @@
   </form>
 
   <script>
+    // Initialize Parse with your Back4App credentials
+    Parse.initialize("JntBzRh42hSe74SIbVM1CQZr2D51YcVbDKcH60m6", "yxn7Yup1UUZildFxcG8a0gmZmUBFEkBwD6gfP702");
+    Parse.serverURL = 'https://parseapi.back4app.com/';
+
     // Toggle the visibility of the medication table
     function toggleMedications() {
       var table = document.getElementById("medicationsTable");
@@ -236,7 +242,75 @@
     function goBack() {
       window.history.back();
     }
+
+    // Handle form submission: Save patient details to Back4App
+    document.getElementById("addPatientForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      
+      // Gather form data
+      var name = document.getElementById("patientName").value.trim();
+      var age = document.getElementById("patientAge").value.trim();
+      var doctor = document.getElementById("doctor").value.trim();
+      var roomNumber = document.getElementById("roomNumber").value.trim();
+      var diagnosis = document.getElementById("diagnosis").value.trim();
+      var rotaterNote = document.getElementById("rotaterNote").value.trim();
+      
+      // Process PMHx checkboxes and other input
+      var pmhx = [];
+      document.querySelectorAll("input[name='pmhx[]']:checked").forEach(function(el) {
+        pmhx.push(el.value);
+      });
+      var pmhxOther = document.getElementById("pmhxOther").value.trim();
+      if(pmhxOther) {
+        pmhx.push(pmhxOther);
+      }
+      
+      // Process PSHx checkboxes and other input
+      var pshx = [];
+      document.querySelectorAll("input[name='pshx[]']:checked").forEach(function(el) {
+        pshx.push(el.value);
+      });
+      var pshxOther = document.getElementById("pshxOther").value.trim();
+      if(pshxOther) {
+        pshx.push(pshxOther);
+      }
+      
+      // Process medication rows
+      var medications = [];
+      var tableBody = document.getElementById("medicationDetails").getElementsByTagName("tbody")[0];
+      for (var i = 0; i < tableBody.rows.length; i++) {
+        var row = tableBody.rows[i];
+        var medName = row.cells[0].querySelector("input").value.trim();
+        var dose = row.cells[1].querySelector("input").value.trim();
+        var frequency = row.cells[2].querySelector("input").value.trim();
+        if (medName && dose && frequency) {
+          medications.push({ medName: medName, dose: dose, frequency: frequency });
+        }
+      }
+      
+      // Create a new Patient object
+      var Patient = Parse.Object.extend("Patient");
+      var patient = new Patient();
+      
+      // Set patient details
+      patient.set("name", name);
+      patient.set("age", age);
+      patient.set("doctor", doctor);
+      patient.set("roomNumber", roomNumber);
+      patient.set("diagnosis", diagnosis);
+      patient.set("rotaterNote", rotaterNote);
+      patient.set("pmhx", pmhx);
+      patient.set("pshx", pshx);
+      patient.set("medications", medications);
+      
+      try {
+        await patient.save();
+        alert("Patient details saved successfully!");
+        window.location.href = "patientMap.html";
+      } catch (error) {
+        alert("Error saving patient details: " + error.message);
+      }
+    });
   </script>
 </body>
 </html>
-
