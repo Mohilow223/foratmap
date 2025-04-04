@@ -7,6 +7,7 @@
   <!-- Include Parse SDK -->
   <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
   <style>
+    /* Global Styles */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -16,7 +17,7 @@
     header {
       background-color: #007BFF;
       color: #fff;
-      padding: 20px;
+      padding: 15px 10px;
       text-align: center;
     }
     .header-flex {
@@ -24,21 +25,23 @@
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      padding: 0 20px;
+      padding: 0 10px;
     }
     .tabs {
       display: flex;
-      align-items: center;
-      gap: 10px;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin: 10px 0;
     }
     .tablink {
-      padding: 10px 20px;
+      padding: 8px 12px;
       cursor: pointer;
       background-color: #fff;
       border: 1px solid #007BFF;
-      border-radius: 5px;
+      border-radius: 4px;
       color: #007BFF;
-      font-size: 16px;
+      font-size: 14px;
+      margin: 2px;
     }
     .tablink.active {
       background-color: #007BFF;
@@ -49,20 +52,21 @@
       background-color: #28a745;
       color: #fff;
       border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      font-size: 16px;
+      padding: 10px 16px;
+      border-radius: 4px;
+      font-size: 14px;
       cursor: pointer;
+      margin: 5px;
     }
     .add-patient-btn:hover {
       background-color: #218838;
     }
     .tabcontent {
       background: #fff;
-      margin: 20px;
-      padding: 20px;
-      border-radius: 5px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin: 10px;
+      padding: 15px;
+      border-radius: 4px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
     }
     /* Responsive table container */
     .table-container {
@@ -71,100 +75,74 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 15px;
+      margin-top: 10px;
       min-width: 600px;
     }
-    table th, table td {
+    table th,
+    table td {
       border: 1px solid #ddd;
-      padding: 10px;
+      padding: 8px;
       text-align: left;
+      font-size: 14px;
     }
     table th {
       background-color: #007BFF;
       color: #fff;
     }
-    @media (max-width: 600px) {
-      .tablink {
-        padding: 8px 16px;
-        font-size: 14px;
-      }
-      .add-patient-btn {
-        padding: 8px 16px;
-        font-size: 14px;
-      }
-      header h1 {
-        font-size: 20px;
-      }
-      table th, table td {
-        padding: 8px;
-        font-size: 14px;
-      }
-    }
-    /* Modal styling */
-    #medicationsModal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0; top: 0;
-      width: 100%; height: 100%;
-      background-color: rgba(0,0,0,0.5);
-    }
-    #medicationsModal .modal-content {
-      background-color: #fff;
-      margin: 10% auto;
-      padding: 20px;
-      border-radius: 5px;
-      width: 90%;
-      max-width: 600px;
-      position: relative;
-    }
-    #medicationsModal h2 {
-      margin-top: 0;
-    }
-    #medicationsModal table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    #medicationsModal table, 
-    #medicationsModal th, 
-    #medicationsModal td {
-      border: 1px solid #ddd;
-    }
-    #medicationsModal th, 
-    #medicationsModal td {
-      padding: 8px;
-      text-align: left;
-    }
-    #medicationsModal th {
-      background-color: #007BFF;
-      color: #fff;
-    }
-    #medicationsModal .modal-buttons {
-      margin-top: 15px;
-      text-align: right;
-    }
-    #medicationsModal button {
-      padding: 8px 16px;
-      margin-left: 10px;
+    /* Improved action buttons */
+    .action-btn {
+      padding: 6px 10px;
       border: none;
-      border-radius: 5px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin: 2px;
       cursor: pointer;
     }
-    #medicationsModal .save-btn {
-      background-color: #28a745;
+    .btn-edit {
+      background-color: #17a2b8;
       color: #fff;
     }
-    #medicationsModal .print-btn {
-      background-color: #007BFF;
+    .btn-edit:hover {
+      background-color: #138496;
+    }
+    .btn-discharge {
+      background-color: #dc3545;
       color: #fff;
     }
-    #medicationsModal .close-btn {
-      background-color: #6c757d;
+    .btn-discharge:hover {
+      background-color: #c82333;
+    }
+    .btn-print {
+      background-color: #ffc107;
+      color: #212529;
+    }
+    .btn-print:hover {
+      background-color: #e0a800;
+    }
+    .btn-medications {
+      background-color: #6f42c1;
       color: #fff;
-      position: absolute;
-      top: 10px;
-      right: 10px;
+    }
+    .btn-medications:hover {
+      background-color: #5a32a3;
+    }
+    /* Mobile Styles */
+    @media (max-width: 600px) {
+      .tablink {
+        padding: 6px 8px;
+        font-size: 12px;
+      }
+      .add-patient-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+      header h1 {
+        font-size: 18px;
+      }
+      table th, table td {
+        padding: 6px;
+        font-size: 12px;
+      }
     }
   </style>
 </head>
@@ -173,9 +151,16 @@
     <h1>Patient Map</h1>
     <div class="header-flex">
       <div class="tabs">
+        <!-- 9 Tabs for wards -->
         <button class="tablink" onclick="openWard(event, 'WardA')">Ward A</button>
         <button class="tablink" onclick="openWard(event, 'WardB')">Ward B</button>
         <button class="tablink" onclick="openWard(event, 'WardC')">Ward C</button>
+        <button class="tablink" onclick="openWard(event, 'WardD')">Ward D</button>
+        <button class="tablink" onclick="openWard(event, 'WardE')">Ward E</button>
+        <button class="tablink" onclick="openWard(event, 'WardF')">Ward F</button>
+        <button class="tablink" onclick="openWard(event, 'WardG')">Ward G</button>
+        <button class="tablink" onclick="openWard(event, 'WardH')">Ward H</button>
+        <button class="tablink" onclick="openWard(event, 'WardI')">Ward I</button>
       </div>
       <div class="add-patient-container">
         <button class="add-patient-btn" onclick="window.location.href='addPatient.html'">Add Patient</button>
@@ -183,7 +168,7 @@
     </div>
   </header>
   
-  <!-- Ward A Content -->
+  <!-- Generate 9 tab contents dynamically -->
   <div id="WardA" class="tabcontent">
     <h2>Ward A</h2>
     <div class="table-container">
@@ -197,14 +182,11 @@
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody>
-          <!-- Patient rows will be inserted here -->
-        </tbody>
+        <tbody></tbody>
       </table>
     </div>
   </div>
   
-  <!-- Ward B Content -->
   <div id="WardB" class="tabcontent" style="display:none;">
     <h2>Ward B</h2>
     <div class="table-container">
@@ -218,14 +200,11 @@
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody>
-          <!-- Patient rows will be inserted here -->
-        </tbody>
+        <tbody></tbody>
       </table>
     </div>
   </div>
   
-  <!-- Ward C Content -->
   <div id="WardC" class="tabcontent" style="display:none;">
     <h2>Ward C</h2>
     <div class="table-container">
@@ -239,37 +218,141 @@
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody>
-          <!-- Patient rows will be inserted here -->
-        </tbody>
+        <tbody></tbody>
       </table>
     </div>
   </div>
   
-  <!-- Medications Modal -->
-  <div id="medicationsModal">
-    <div class="modal-content">
-      <button class="close-btn" onclick="closeMedicationsModal()">Close</button>
+  <div id="WardD" class="tabcontent" style="display:none;">
+    <h2>Ward D</h2>
+    <div class="table-container">
+      <table id="tableWardD">
+        <thead>
+          <tr>
+            <th>Patient Name</th>
+            <th>Treating Doctor</th>
+            <th>Room Number</th>
+            <th>Dx</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+  
+  <div id="WardE" class="tabcontent" style="display:none;">
+    <h2>Ward E</h2>
+    <div class="table-container">
+      <table id="tableWardE">
+        <thead>
+          <tr>
+            <th>Patient Name</th>
+            <th>Treating Doctor</th>
+            <th>Room Number</th>
+            <th>Dx</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+  
+  <div id="WardF" class="tabcontent" style="display:none;">
+    <h2>Ward F</h2>
+    <div class="table-container">
+      <table id="tableWardF">
+        <thead>
+          <tr>
+            <th>Patient Name</th>
+            <th>Treating Doctor</th>
+            <th>Room Number</th>
+            <th>Dx</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+  
+  <div id="WardG" class="tabcontent" style="display:none;">
+    <h2>Ward G</h2>
+    <div class="table-container">
+      <table id="tableWardG">
+        <thead>
+          <tr>
+            <th>Patient Name</th>
+            <th>Treating Doctor</th>
+            <th>Room Number</th>
+            <th>Dx</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+  
+  <div id="WardH" class="tabcontent" style="display:none;">
+    <h2>Ward H</h2>
+    <div class="table-container">
+      <table id="tableWardH">
+        <thead>
+          <tr>
+            <th>Patient Name</th>
+            <th>Treating Doctor</th>
+            <th>Room Number</th>
+            <th>Dx</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+  
+  <div id="WardI" class="tabcontent" style="display:none;">
+    <h2>Ward I</h2>
+    <div class="table-container">
+      <table id="tableWardI">
+        <thead>
+          <tr>
+            <th>Patient Name</th>
+            <th>Treating Doctor</th>
+            <th>Room Number</th>
+            <th>Dx</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- Medications Modal (for editing and printing) -->
+  <div id="medicationsModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div class="modal-content" style="background-color: #fff; margin: 10% auto; padding: 20px; border-radius: 5px; width: 90%; max-width: 600px; position: relative;">
+      <button class="close-btn" onclick="closeMedicationsModal()" style="background-color: #6c757d; color: #fff; border: none; border-radius: 4px; padding: 6px 10px; position: absolute; top: 10px; right: 10px; cursor: pointer;">Close</button>
       <h2>Edit Medications</h2>
       <div class="modal-table-container">
-        <table id="modalMedicationTable">
+        <table id="modalMedicationTable" style="width:100%; border-collapse: collapse; margin-top: 10px;">
           <thead>
             <tr>
-              <th>Medication Name</th>
-              <th>Dose</th>
-              <th>Frequency</th>
-              <th>Action</th>
+              <th style="border: 1px solid #ddd; padding: 8px; background-color: #007BFF; color: #fff;">Medication Name</th>
+              <th style="border: 1px solid #ddd; padding: 8px; background-color: #007BFF; color: #fff;">Dose</th>
+              <th style="border: 1px solid #ddd; padding: 8px; background-color: #007BFF; color: #fff;">Frequency</th>
+              <th style="border: 1px solid #ddd; padding: 8px;">Action</th>
             </tr>
           </thead>
-          <tbody>
-            <!-- Medication rows will be added here -->
-          </tbody>
+          <tbody></tbody>
         </table>
       </div>
-      <button type="button" onclick="addModalMedicationRow()">Add Medication Row</button>
-      <div class="modal-buttons">
-        <button class="save-btn" onclick="saveMedications()">Save</button>
-        <button class="print-btn" onclick="printModalMedications()">Print</button>
+      <button type="button" onclick="addModalMedicationRow()" style="padding: 8px 12px; border: none; border-radius: 4px; background-color: #007BFF; color: #fff; margin-top: 10px; cursor: pointer;">Add Medication Row</button>
+      <div class="modal-buttons" style="margin-top: 15px; text-align: right;">
+        <button class="save-btn" onclick="saveMedications()" style="padding: 8px 12px; border: none; border-radius: 4px; background-color: #28a745; color: #fff; cursor: pointer;">Save</button>
+        <button class="print-btn" onclick="printModalMedications()" style="padding: 8px 12px; border: none; border-radius: 4px; background-color: #ffc107; color: #212529; cursor: pointer;">Print</button>
       </div>
     </div>
   </div>
@@ -279,19 +362,18 @@
     Parse.initialize("JntBzRh42hSe74SIbVM1CQZr2D51YcVbDKcH60m6", "yxn7Yup1UUZildFxcG8a0gmZmUBFEkBwD6gfP702");
     Parse.serverURL = 'https://parseapi.back4app.com/';
     
-    // Global variable to store current patient ID for medications modal
+    // Global variables for medications modal
     let currentPatientIdForMedications = null;
-    let currentPatientRecord = null; // Used when editing medications in modal
+    let currentPatientRecord = null;
     
     // Function to switch between ward tabs
     function openWard(evt, wardName) {
-      var i, tabcontent, tablinks;
-      tabcontent = document.getElementsByClassName("tabcontent");
-      for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
+      const tabcontents = document.getElementsByClassName("tabcontent");
+      for (let i = 0; i < tabcontents.length; i++) {
+        tabcontents[i].style.display = "none";
       }
-      tablinks = document.getElementsByClassName("tablink");
-      for (i = 0; i < tablinks.length; i++) {
+      const tablinks = document.getElementsByClassName("tablink");
+      for (let i = 0; i < tablinks.length; i++) {
         tablinks[i].classList.remove("active");
       }
       document.getElementById(wardName).style.display = "block";
@@ -304,20 +386,19 @@
       const query = new Parse.Query(Patient);
       try {
         const results = await query.find();
-        // Clear existing table rows in each ward
+        // Clear existing table rows in all ward tables
         document.querySelectorAll("table tbody").forEach(tbody => tbody.innerHTML = "");
         // Loop through each patient record
         results.forEach(patient => {
-          // Assume the patient record includes a "ward" field.
-          // Default to "Ward A" if not present.
-          let ward = patient.get("ward") || "Ward A";
+          // Default ward to "Ward A" if not set; otherwise, use patient.get("ward")
+          let ward = (patient.get("ward") || "Ward A").toLowerCase();
           const name = patient.get("name") || "";
           const doctor = patient.get("doctor") || "";
           const roomNumber = patient.get("roomNumber") || "";
           const diagnosis = patient.get("diagnosis") || "";
           const objectId = patient.id;
           
-          // Create a new table row with new action buttons: Edit, Discharge, Print Meds, and Medications
+          // Create a table row with improved action buttons
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${name}</td>
@@ -325,20 +406,32 @@
             <td>${roomNumber}</td>
             <td>${diagnosis}</td>
             <td>
-              <button onclick="editPatient('${objectId}')">Edit</button>
-              <button onclick="dischargePatient('${objectId}', this)">Discharge</button>
-              <button onclick="printMeds('${objectId}')">Print Meds</button>
-              <button onclick="openMedicationsModal('${objectId}')">Medications</button>
+              <button class="action-btn btn-edit" onclick="editPatient('${objectId}')">Edit</button>
+              <button class="action-btn btn-discharge" onclick="dischargePatient('${objectId}', this)">Discharge</button>
+              <button class="action-btn btn-print" onclick="printMeds('${objectId}')">Print Meds</button>
+              <button class="action-btn btn-medications" onclick="openMedicationsModal('${objectId}')">Medications</button>
             </td>
           `;
           
-          // Append row to the corresponding ward table based on the "ward" field
-          if (ward.toLowerCase() === "ward a") {
+          // Append row to the appropriate ward table based on ward name
+          if (ward === "ward a") {
             document.querySelector("#tableWardA tbody").appendChild(tr);
-          } else if (ward.toLowerCase() === "ward b") {
+          } else if (ward === "ward b") {
             document.querySelector("#tableWardB tbody").appendChild(tr);
-          } else if (ward.toLowerCase() === "ward c") {
+          } else if (ward === "ward c") {
             document.querySelector("#tableWardC tbody").appendChild(tr);
+          } else if (ward === "ward d") {
+            document.querySelector("#tableWardD tbody").appendChild(tr);
+          } else if (ward === "ward e") {
+            document.querySelector("#tableWardE tbody").appendChild(tr);
+          } else if (ward === "ward f") {
+            document.querySelector("#tableWardF tbody").appendChild(tr);
+          } else if (ward === "ward g") {
+            document.querySelector("#tableWardG tbody").appendChild(tr);
+          } else if (ward === "ward h") {
+            document.querySelector("#tableWardH tbody").appendChild(tr);
+          } else if (ward === "ward i") {
+            document.querySelector("#tableWardI tbody").appendChild(tr);
           }
         });
       } catch (error) {
@@ -351,7 +444,7 @@
       window.location.href = "editPatient.html?id=" + encodeURIComponent(patientId);
     }
     
-    // Discharge patient: mark the patient as discharged on Back4App and update the row style
+    // Discharge patient: mark as discharged and update row style
     async function dischargePatient(patientId, button) {
       const Patient = Parse.Object.extend("Patient");
       const query = new Parse.Query(Patient);
@@ -367,7 +460,7 @@
       }
     }
     
-    // New function: Print medications list for a patient
+    // Print medications list for a patient in a new window
     async function printMeds(patientId) {
       const Patient = Parse.Object.extend("Patient");
       const query = new Parse.Query(Patient);
@@ -408,7 +501,7 @@
       }
     }
     
-    // New function: Open medications modal for editing and printing
+    // Open medications modal for editing and printing
     async function openMedicationsModal(patientId) {
       currentPatientIdForMedications = patientId;
       const Patient = Parse.Object.extend("Patient");
@@ -416,10 +509,8 @@
       try {
         currentPatientRecord = await query.get(patientId);
         const medications = currentPatientRecord.get("medications") || [];
-        // Clear modal table body
         const modalTbody = document.querySelector("#modalMedicationTable tbody");
         modalTbody.innerHTML = "";
-        // Populate modal with current medications
         medications.forEach(med => {
           const row = modalTbody.insertRow();
           row.insertCell(0).innerHTML = `<input type="text" name="modalMedName[]" value="${med.medName}" required>`;
@@ -427,19 +518,18 @@
           row.insertCell(2).innerHTML = `<input type="text" name="modalFrequency[]" value="${med.frequency}" required>`;
           row.insertCell(3).innerHTML = `<button type="button" onclick="removeModalMedicationRow(this)">Remove</button>`;
         });
-        // Show modal
         document.getElementById("medicationsModal").style.display = "block";
       } catch (error) {
         alert("Error fetching medications: " + error.message);
       }
     }
     
-    // Close medications modal
+    // Close the medications modal
     function closeMedicationsModal() {
       document.getElementById("medicationsModal").style.display = "none";
     }
     
-    // Add new medication row in modal
+    // Add a new medication row in the modal
     function addModalMedicationRow() {
       const modalTbody = document.querySelector("#modalMedicationTable tbody");
       const row = modalTbody.insertRow();
@@ -449,13 +539,13 @@
       row.insertCell(3).innerHTML = `<button type="button" onclick="removeModalMedicationRow(this)">Remove</button>`;
     }
     
-    // Remove a medication row from modal
+    // Remove a medication row from the modal
     function removeModalMedicationRow(button) {
       const row = button.parentNode.parentNode;
       row.parentNode.removeChild(row);
     }
     
-    // Save updated medications from modal back to Back4App
+    // Save updated medications from the modal to Back4App
     async function saveMedications() {
       const modalTbody = document.querySelector("#modalMedicationTable tbody");
       const rows = modalTbody.rows;
@@ -477,7 +567,6 @@
         await currentPatientRecord.save();
         alert("Medications updated successfully!");
         closeMedicationsModal();
-        // Optionally, refresh the patients list to reflect changes
         loadPatients();
       } catch (error) {
         alert("Error saving medications: " + error.message);
@@ -486,7 +575,6 @@
     
     // Print medications from within the modal
     function printModalMedications() {
-      // Build HTML content from modal table data
       const modalTbody = document.querySelector("#modalMedicationTable tbody");
       let htmlContent = `<html><head><title>Medications</title></head><body>`;
       htmlContent += `<h2>Medications</h2>`;
