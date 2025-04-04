@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Patient</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Add New Patient</h1>
+  </header>
+  <form id="addPatientForm" action="patientMap.html" method="POST">
+    <div class="form-group">
+      <label for="patientName">Name:</label>
+      <input type="text" id="patientName" name="patientName" required>
+    </div>
+    <div class="form-group">
+      <label for="patientAge">Age:</label>
+      <input type="number" id="patientAge" name="patientAge" required>
+    </div>
+    <div class="form-group">
+      <label for="doctor">Doctor:</label>
+      <input type="text" id="doctor" name="doctor" required>
+    </div>
+    <div class="form-group">
+      <label for="roomNumber">Room Number:</label>
+      <input type="text" id="roomNumber" name="roomNumber" required>
+    </div>
+    <div class="form-group">
+      <label for="phmx">Past Medical History (PHMx):</label>
+      <textarea id="phmx" name="phmx"></textarea>
+    </div>
+    <div class="form-group">
+      <label for="pshx">Past Surgical History (PShx):</label>
+      <textarea id="pshx" name="pshx"></textarea>
+    </div>
+    <div class="form-group">
+      <label for="diagnosis">Diagnosis (Dx):</label>
+      <textarea id="diagnosis" name="diagnosis" required></textarea>
+    </div>
+    <div class="form-group">
+      <label for="medications">Medications:</label>
+      <button type="button" onclick="toggleMedications()">Add Medications</button>
+    </div>
+    <div id="medicationsTable" style="display:none;">
+      <h3>Medication Details</h3>
+      <table id="medicationDetails">
+        <thead>
+          <tr>
+            <th>Medication Name</th>
+            <th>Dose</th>
+            <th>Frequency</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Medication rows will be added dynamically -->
+        </tbody>
+      </table>
+      <button type="button" onclick="addMedicationRow()">Add Medication Row</button>
+    </div>
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+    // Toggle the visibility of the medication table
+    function toggleMedications() {
+      var table = document.getElementById("medicationsTable");
+      table.style.display = (table.style.display === "none") ? "block" : "none";
+    }
+
+    // Dynamically add a new medication row
+    function addMedicationRow() {
+      var table = document.getElementById("medicationDetails").getElementsByTagName('tbody')[0];
+      var row = table.insertRow();
+      
+      var cell1 = row.insertCell(0);
+      var medName = document.createElement("input");
+      medName.type = "text";
+      medName.name = "medName[]";
+      medName.required = true;
+      cell1.appendChild(medName);
+      
+      var cell2 = row.insertCell(1);
+      var dose = document.createElement("input");
+      dose.type = "text";
+      dose.name = "dose[]";
+      dose.required = true;
+      cell2.appendChild(dose);
+      
+      var cell3 = row.insertCell(2);
+      var frequency = document.createElement("input");
+      frequency.type = "text";
+      frequency.name = "frequency[]";
+      frequency.required = true;
+      cell3.appendChild(frequency);
+      
+      var cell4 = row.insertCell(3);
+      var removeButton = document.createElement("button");
+      removeButton.type = "button";
+      removeButton.textContent = "Remove";
+      removeButton.onclick = function() {
+        // Remove this medication row
+        table.deleteRow(row.rowIndex - 1);
+      };
+      cell4.appendChild(removeButton);
+    }
+  </script>
+</body>
+</html>
