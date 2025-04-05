@@ -23,7 +23,7 @@
     .header-flex {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
       flex-wrap: wrap;
       padding: 0 10px;
     }
@@ -32,6 +32,7 @@
       flex-wrap: wrap;
       gap: 5px;
       margin: 10px 0;
+      justify-content: center;
     }
     .tablink {
       padding: 8px 12px;
@@ -55,15 +56,15 @@
       margin: 10px;
       padding: 15px;
       border-radius: 4px;
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
     }
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
-      min-width: 600px;
     }
-    table th, table td {
+    table th,
+    table td {
       border: 1px solid #ddd;
       padding: 8px;
       text-align: left;
@@ -72,6 +73,11 @@
     table th {
       background-color: #007BFF;
       color: #fff;
+    }
+    /* Make the Room No column smaller */
+    .room-no {
+      width: 50px;
+      white-space: nowrap;
     }
     /* Improved Action Buttons */
     .action-btn {
@@ -124,7 +130,7 @@
     </div>
   </header>
   
-  <!-- Nine Ward Contents -->
+  <!-- Ward A Content -->
   <div id="WardA" class="tabcontent">
     <h2>Ward A</h2>
     <div class="table-container">
@@ -133,16 +139,18 @@
           <tr>
             <th>Patient Name</th>
             <th>Treating Doctor</th>
-            <th>Room Number</th>
+            <th class="room-no">Room No</th>
             <th>Dx</th>
+            <th>Rotator Note</th>
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody><!-- Rows inserted dynamically --></tbody>
+        <tbody><!-- Rows will be inserted here --></tbody>
       </table>
     </div>
   </div>
   
+  <!-- Ward B Content -->
   <div id="WardB" class="tabcontent" style="display:none;">
     <h2>Ward B</h2>
     <div class="table-container">
@@ -151,16 +159,18 @@
           <tr>
             <th>Patient Name</th>
             <th>Treating Doctor</th>
-            <th>Room Number</th>
+            <th class="room-no">Room No</th>
             <th>Dx</th>
+            <th>Rotator Note</th>
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody><!-- Rows inserted dynamically --></tbody>
+        <tbody><!-- Rows will be inserted here --></tbody>
       </table>
     </div>
   </div>
   
+  <!-- Ward C Content -->
   <div id="WardC" class="tabcontent" style="display:none;">
     <h2>Ward C</h2>
     <div class="table-container">
@@ -169,15 +179,241 @@
           <tr>
             <th>Patient Name</th>
             <th>Treating Doctor</th>
-            <th>Room Number</th>
+            <th class="room-no">Room No</th>
             <th>Dx</th>
+            <th>Rotator Note</th>
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody><!-- Rows inserted dynamically --></tbody>
+        <tbody><!-- Rows will be inserted here --></tbody>
       </table>
     </div>
   </div>
   
+  <!-- Ward D Content -->
   <div id="WardD" class="tabcontent" style="display:none;">
-    <h2>Ward D</h
+    <h2>Ward D</h2>
+    <div class="table-container">
+      <table id="tableWardD">
+        <thead>
+          <tr>
+            <th>Patient Name</th>
+            <th>Treating Doctor</th>
+            <th class="room-no">Room No</th>
+            <th>Dx</th>
+            <th>Rotator Note</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody><!-- Rows will be inserted here --></tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- Ward E Content -->
+  <div id="WardE" class="tabcontent" style="display:none;">
+    <h2>Ward E</h2>
+    <div class="table-container">
+      <table id="tableWardE">
+        <thead>
+          <tr>
+            <th>Patient Name</th>
+            <th>Treating Doctor</th>
+            <th class="room-no">Room No</th>
+            <th>Dx</th>
+            <th>Rotator Note</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody><!-- Rows will be inserted here --></tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- Ward F Content -->
+  <div id="WardF" class="tabcontent" style="display:none;">
+    <h2>Ward F</h2>
+    <div class="table-container">
+      <table id="tableWardF">
+        <thead>
+          <tr>
+            <th>Patient Name</th>
+            <th>Treating Doctor</th>
+            <th class="room-no">Room No</th>
+            <th>Dx</th>
+            <th>Rotator Note</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody><!-- Rows will be inserted here --></tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- Ward G Content -->
+  <div id="WardG" class="tabcontent" style="display:none;">
+    <h2>Ward G</h2>
+    <div class="table-container">
+      <table id="tableWardG">
+        <thead>
+          <tr>
+            <th>Patient Name</th>
+            <th>Treating Doctor</th>
+            <th class="room-no">Room No</th>
+            <th>Dx</th>
+            <th>Rotator Note</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody><!-- Rows will be inserted here --></tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- Ward H Content -->
+  <div id="WardH" class="tabcontent" style="display:none;">
+    <h2>Ward H</h2>
+    <div class="table-container">
+      <table id="tableWardH">
+        <thead>
+          <tr>
+            <th>Patient Name</th>
+            <th>Treating Doctor</th>
+            <th class="room-no">Room No</th>
+            <th>Dx</th>
+            <th>Rotator Note</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody><!-- Rows will be inserted here --></tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- Ward I Content -->
+  <div id="WardI" class="tabcontent" style="display:none;">
+    <h2>Ward I</h2>
+    <div class="table-container">
+      <table id="tableWardI">
+        <thead>
+          <tr>
+            <th>Patient Name</th>
+            <th>Treating Doctor</th>
+            <th class="room-no">Room No</th>
+            <th>Dx</th>
+            <th>Rotator Note</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody><!-- Rows will be inserted here --></tbody>
+      </table>
+    </div>
+  </div>
+  
+  <script>
+    // Initialize Parse with your Back4App credentials
+    Parse.initialize("JntBzRh42hSe74SIbVM1CQZr2D51YcVbDKcH60m6", "yxn7Yup1UUZildFxcG8a0gmZmUBFEkBwD6gfP702");
+    Parse.serverURL = 'https://parseapi.back4app.com/';
+    
+    // Function to switch between ward tabs
+    function openWard(evt, wardName) {
+      const tabcontents = document.getElementsByClassName("tabcontent");
+      for (let i = 0; i < tabcontents.length; i++) {
+        tabcontents[i].style.display = "none";
+      }
+      const tablinks = document.getElementsByClassName("tablink");
+      for (let i = 0; i < tablinks.length; i++) {
+        tablinks[i].classList.remove("active");
+      }
+      document.getElementById(wardName).style.display = "block";
+      evt.currentTarget.classList.add("active");
+    }
+    
+    // Load discharged patients from Back4App and display them in the appropriate ward table
+    async function loadPatients() {
+      const Patient = Parse.Object.extend("Patient");
+      const query = new Parse.Query(Patient);
+      // Query only discharged patients
+      query.equalTo("discharged", true);
+      try {
+        const results = await query.find();
+        // Clear existing table rows in all ward tables
+        document.querySelectorAll("table tbody").forEach(tbody => tbody.innerHTML = "");
+        // Loop through each patient record
+        results.forEach(patient => {
+          // Default ward to "Ward A" if not set; otherwise, use patient.get("ward")
+          let ward = (patient.get("ward") || "Ward A").toLowerCase();
+          const name = patient.get("name") || "";
+          const doctor = patient.get("doctor") || "";
+          const roomNumber = patient.get("roomNumber") || "";
+          const diagnosis = patient.get("diagnosis") || "";
+          const rotaterNote = patient.get("rotaterNote") || "";
+          const objectId = patient.id;
+          
+          // Create a table row with the new "Rotator Note" column and a smaller Room No column
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${name}</td>
+            <td>${doctor}</td>
+            <td class="room-no">${roomNumber}</td>
+            <td>${diagnosis}</td>
+            <td>${rotaterNote}</td>
+            <td>
+              <button class="action-btn btn-print" onclick="printMeds('${objectId}')">Print</button>
+            </td>
+          `;
+          
+          // Append row to the appropriate ward table based on ward name
+          if (ward === "ward a") {
+            document.querySelector("#tableWardA tbody").appendChild(tr);
+          } else if (ward === "ward b") {
+            document.querySelector("#tableWardB tbody").appendChild(tr);
+          } else if (ward === "ward c") {
+            document.querySelector("#tableWardC tbody").appendChild(tr);
+          } else if (ward === "ward d") {
+            document.querySelector("#tableWardD tbody").appendChild(tr);
+          } else if (ward === "ward e") {
+            document.querySelector("#tableWardE tbody").appendChild(tr);
+          } else if (ward === "ward f") {
+            document.querySelector("#tableWardF tbody").appendChild(tr);
+          } else if (ward === "ward g") {
+            document.querySelector("#tableWardG tbody").appendChild(tr);
+          } else if (ward === "ward h") {
+            document.querySelector("#tableWardH tbody").appendChild(tr);
+          } else if (ward === "ward i") {
+            document.querySelector("#tableWardI tbody").appendChild(tr);
+          }
+        });
+      } catch (error) {
+        console.error("Error loading discharged patients: ", error);
+      }
+    }
+    
+    // Print medications (or patient details) in a new window
+    async function printMeds(patientId) {
+      const Patient = Parse.Object.extend("Patient");
+      const query = new Parse.Query(Patient);
+      try {
+        const patient = await query.get(patientId);
+        let htmlContent = `<html><head><title>Patient Details for ${patient.get("name")}</title></head><body>`;
+        htmlContent += `<h2>Patient Details for ${patient.get("name")}</h2>`;
+        htmlContent += `<p><strong>Treating Doctor:</strong> ${patient.get("doctor") || ""}</p>`;
+        htmlContent += `<p><strong>Room No:</strong> ${patient.get("roomNumber") || ""}</p>`;
+        htmlContent += `<p><strong>Diagnosis:</strong> ${patient.get("diagnosis") || ""}</p>`;
+        htmlContent += `<p><strong>Rotator Note:</strong> ${patient.get("rotaterNote") || ""}</p>`;
+        htmlContent += `</body></html>`;
+        const printWindow = window.open("", "", "height=600,width=800");
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+      } catch (error) {
+        alert("Error printing patient details: " + error.message);
+      }
+    }
+    
+    // Load discharged patients when the page loads
+    window.onload = loadPatients;
+  </script>
+</body>
+</html>
