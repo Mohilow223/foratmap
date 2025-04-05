@@ -37,36 +37,26 @@
     }
     .header-flex {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
       padding: 0 10px;
     }
-    .tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
+    /* Ward Selection Dropdown */
+    .ward-select-container {
       margin: 10px 0;
+      width: 100%;
+      max-width: 400px;
     }
-    .tablink {
+    .ward-select-container select {
+      width: 100%;
       padding: 8px 12px;
-      cursor: pointer;
-      background-color: #fff;
+      font-size: 14px;
       border: 1px solid var(--primary-color);
       border-radius: 4px;
-      color: var(--primary-color);
-      font-size: 14px;
-      transition: background-color 0.3s ease;
-      margin: 2px;
     }
-    .tablink:hover {
-      background-color: #e6f0ff;
+    .add-patient-container {
+      margin-top: 10px;
     }
-    .tablink.active {
-      background-color: var(--primary-color);
-      color: #fff;
-    }
-    .add-patient-container {}
     .add-patient-btn {
       background-color: var(--secondary-color);
       color: #fff;
@@ -151,11 +141,82 @@
     .btn-medications:hover {
       background-color: #5a32a3;
     }
+    /* Medication Modal Styles */
+    #medicationsModal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      overflow-y: auto;
+      padding: 20px 0;
+    }
+    #medicationsModal .modal-content {
+      background-color: #fff;
+      margin: auto;
+      padding: 20px;
+      border-radius: 5px;
+      width: 95%;
+      max-width: 600px;
+      position: relative;
+    }
+    #medicationsModal h2 {
+      margin-top: 0;
+    }
+    #medicationsModal table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    #medicationsModal th,
+    #medicationsModal td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+      font-size: 14px;
+    }
+    #medicationsModal th {
+      background-color: var(--primary-color);
+      color: #fff;
+    }
+    #medicationsModal .modal-buttons {
+      margin-top: 15px;
+      text-align: right;
+    }
+    #medicationsModal button {
+      padding: 8px 12px;
+      margin-left: 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #medicationsModal .save-btn {
+      background-color: var(--secondary-color);
+      color: #fff;
+    }
+    #medicationsModal .print-btn {
+      background-color: var(--warning-color);
+      color: #212529;
+    }
+    #medicationsModal .close-btn {
+      background-color: #6c757d;
+      color: #fff;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      cursor: pointer;
+    }
     /* Mobile Styles */
     @media (max-width: 600px) {
-      .tablink {
-        padding: 6px 8px;
+      .ward-select-container select {
         font-size: 12px;
+        padding: 6px 8px;
       }
       .add-patient-btn {
         padding: 8px 12px;
@@ -168,6 +229,9 @@
         padding: 6px;
         font-size: 12px;
       }
+      #medicationsModal .modal-content {
+        width: 95%;
+      }
     }
   </style>
 </head>
@@ -175,17 +239,19 @@
   <header>
     <h1>Patient Map</h1>
     <div class="header-flex">
-      <div class="tabs">
-        <!-- 9 Tabs for wards -->
-        <button class="tablink" onclick="openWard(event, 'WardA')">Ward A</button>
-        <button class="tablink" onclick="openWard(event, 'WardB')">Ward B</button>
-        <button class="tablink" onclick="openWard(event, 'WardC')">Ward C</button>
-        <button class="tablink" onclick="openWard(event, 'WardD')">Ward D</button>
-        <button class="tablink" onclick="openWard(event, 'WardE')">Ward E</button>
-        <button class="tablink" onclick="openWard(event, 'WardF')">Ward F</button>
-        <button class="tablink" onclick="openWard(event, 'WardG')">Ward G</button>
-        <button class="tablink" onclick="openWard(event, 'WardH')">Ward H</button>
-        <button class="tablink" onclick="openWard(event, 'WardI')">Ward I</button>
+      <!-- Ward Selection Dropdown -->
+      <div class="ward-select-container">
+        <select id="wardSelect" onchange="selectWard()">
+          <option value="WardA">Ward A</option>
+          <option value="WardB">Ward B</option>
+          <option value="WardC">Ward C</option>
+          <option value="WardD">Ward D</option>
+          <option value="WardE">Ward E</option>
+          <option value="WardF">Ward F</option>
+          <option value="WardG">Ward G</option>
+          <option value="WardH">Ward H</option>
+          <option value="WardI">Ward I</option>
+        </select>
       </div>
       <div class="add-patient-container">
         <button class="add-patient-btn" onclick="window.location.href='addPatient.html'">Add Patient</button>
@@ -367,21 +433,19 @@
   
   <script>
     // Initialize Parse with your Back4App credentials
-    Parse.initialize("JntBzRh42hSe74SIbVM1CQZr2D51YcVbDKcH60m6", "yxn7Yup1UUZildFxcG8a0gmZmUBFEkBwD6gfP702");
+    Parse.initialize("YOUR_APP_ID", "YOUR_JAVASCRIPT_KEY");
     Parse.serverURL = 'https://parseapi.back4app.com/';
     
-    // Function to switch between ward tabs
-    function openWard(evt, wardName) {
+    // When a ward is selected from the dropdown, show the corresponding ward content
+    function selectWard() {
+      const selectedWard = document.getElementById("wardSelect").value;
+      // Hide all ward content divs
       const tabcontents = document.getElementsByClassName("tabcontent");
       for (let i = 0; i < tabcontents.length; i++) {
         tabcontents[i].style.display = "none";
       }
-      const tablinks = document.getElementsByClassName("tablink");
-      for (let i = 0; i < tablinks.length; i++) {
-        tablinks[i].classList.remove("active");
-      }
-      document.getElementById(wardName).style.display = "block";
-      evt.currentTarget.classList.add("active");
+      // Display the selected ward content
+      document.getElementById(selectedWard).style.display = "block";
     }
     
     // Load only non-discharged patients from Back4App
@@ -451,18 +515,19 @@
       window.location.href = "editPatient.html?id=" + encodeURIComponent(patientId);
     }
     
-    // Discharge patient: mark as discharged on Back4App, remove row from UI
+    // Discharge patient: mark as discharged on Back4App and remove row from UI
     async function dischargePatient(patientId, button) {
       const Patient = Parse.Object.extend("Patient");
       const query = new Parse.Query(Patient);
       try {
         const patient = await query.get(patientId);
         patient.set("discharged", true);
+        // Optionally, record the discharge date/time on the patient record
+        patient.set("dischargeDate", new Date().toISOString());
         await patient.save();
         // Remove the row from the UI
         const row = button.parentNode.parentNode;
         row.parentNode.removeChild(row);
-        // Optionally show a toast/alert
         alert("Patient marked as discharged.");
       } catch (error) {
         alert("Error discharging patient: " + error.message);
@@ -623,17 +688,17 @@
       printWindow.print();
     }
     
-    // Load discharged patients when the page loads
+    // Load patients when the page loads
     window.onload = loadPatients;
   </script>
   
   <!-- Medications Modal -->
-  <div id="medicationsModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
-    <div class="modal-content" style="background-color: #fff; margin: 10% auto; padding: 20px; border-radius: 5px; width: 90%; max-width: 600px; position: relative;">
-      <button class="close-btn" onclick="closeMedicationsModal()" style="background-color: #6c757d; color: #fff; border: none; border-radius: 4px; padding: 6px 10px; position: absolute; top: 10px; right: 10px; cursor: pointer;">Close</button>
+  <div id="medicationsModal">
+    <div class="modal-content">
+      <button class="close-btn" onclick="closeMedicationsModal()">Close</button>
       <h2>Edit Medications</h2>
       <div class="modal-table-container">
-        <table id="modalMedicationTable" style="width:100%; border-collapse: collapse; margin-top: 10px;">
+        <table id="modalMedicationTable">
           <thead>
             <tr>
               <th style="border: 1px solid #ddd; padding: 8px; background-color: var(--primary-color); color: #fff;">Medication Name</th>
@@ -645,10 +710,10 @@
           <tbody></tbody>
         </table>
       </div>
-      <button type="button" onclick="addModalMedicationRow()" style="padding: 8px 12px; border: none; border-radius: 4px; background-color: var(--primary-color); color: #fff; margin-top: 10px; cursor: pointer;">Add Medication Row</button>
-      <div class="modal-buttons" style="margin-top: 15px; text-align: right;">
-        <button class="save-btn" onclick="saveMedications()" style="padding: 8px 12px; border: none; border-radius: 4px; background-color: var(--secondary-color); color: #fff; cursor: pointer;">Save</button>
-        <button class="print-btn" onclick="printModalMedications()" style="padding: 8px 12px; border: none; border-radius: 4px; background-color: var(--warning-color); color: #212529; cursor: pointer;">Print</button>
+      <button type="button" onclick="addModalMedicationRow()">Add Medication Row</button>
+      <div class="modal-buttons">
+        <button class="save-btn" onclick="saveMedications()">Save</button>
+        <button class="print-btn" onclick="printModalMedications()">Print</button>
       </div>
     </div>
   </div>
