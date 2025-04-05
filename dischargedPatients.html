@@ -7,18 +7,31 @@
   <!-- Include Parse SDK -->
   <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
   <style>
-    /* Global Styles */
+    :root {
+      --primary-color: #007BFF;
+      --secondary-color: #28a745;
+      --danger-color: #dc3545;
+      --info-color: #17a2b8;
+      --warning-color: #ffc107;
+      --purple-color: #6f42c1;
+      --bg-color: #f5f5f5;
+      --font-family: 'Roboto', sans-serif;
+    }
+    * {
+      box-sizing: border-box;
+    }
     body {
-      font-family: Arial, sans-serif;
+      font-family: var(--font-family);
       margin: 0;
       padding: 0;
-      background-color: #f5f5f5;
+      background-color: var(--bg-color);
     }
     header {
-      background-color: #007BFF;
+      background-color: var(--primary-color);
       color: #fff;
       padding: 15px 10px;
       text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .header-flex {
       display: flex;
@@ -38,14 +51,18 @@
       padding: 8px 12px;
       cursor: pointer;
       background-color: #fff;
-      border: 1px solid #007BFF;
+      border: 1px solid var(--primary-color);
       border-radius: 4px;
-      color: #007BFF;
+      color: var(--primary-color);
       font-size: 14px;
+      transition: background-color 0.3s ease;
       margin: 2px;
     }
+    .tablink:hover {
+      background-color: #e6f0ff;
+    }
     .tablink.active {
-      background-color: #007BFF;
+      background-color: var(--primary-color);
       color: #fff;
     }
     .table-container {
@@ -57,6 +74,7 @@
       padding: 15px;
       border-radius: 4px;
       box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
     }
     table {
       width: 100%;
@@ -71,12 +89,17 @@
       font-size: 14px;
     }
     table th {
-      background-color: #007BFF;
+      background-color: var(--primary-color);
       color: #fff;
     }
-    /* Make the Room No column smaller */
+    /* Smaller Room No column */
     .room-no {
       width: 50px;
+      white-space: nowrap;
+    }
+    /* Discharge Date column */
+    .discharge-date {
+      width: 140px;
       white-space: nowrap;
     }
     /* Improved Action Buttons */
@@ -87,13 +110,21 @@
       font-size: 12px;
       margin: 2px;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
     .btn-print {
-      background-color: #ffc107;
+      background-color: var(--warning-color);
       color: #212529;
     }
     .btn-print:hover {
       background-color: #e0a800;
+    }
+    .btn-restore {
+      background-color: var(--secondary-color);
+      color: #fff;
+    }
+    .btn-restore:hover {
+      background-color: #218838;
     }
     /* Mobile Styles */
     @media (max-width: 600px) {
@@ -130,7 +161,7 @@
     </div>
   </header>
   
-  <!-- Ward A Content -->
+  <!-- 9 Ward Contents -->
   <div id="WardA" class="tabcontent">
     <h2>Ward A</h2>
     <div class="table-container">
@@ -142,15 +173,15 @@
             <th class="room-no">Room No</th>
             <th>Dx</th>
             <th>Rotator Note</th>
+            <th class="discharge-date">Discharge Date</th>
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody><!-- Rows will be inserted here --></tbody>
+        <tbody><!-- Rows inserted dynamically --></tbody>
       </table>
     </div>
   </div>
   
-  <!-- Ward B Content -->
   <div id="WardB" class="tabcontent" style="display:none;">
     <h2>Ward B</h2>
     <div class="table-container">
@@ -162,15 +193,15 @@
             <th class="room-no">Room No</th>
             <th>Dx</th>
             <th>Rotator Note</th>
+            <th class="discharge-date">Discharge Date</th>
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody><!-- Rows will be inserted here --></tbody>
+        <tbody><!-- Rows inserted dynamically --></tbody>
       </table>
     </div>
   </div>
   
-  <!-- Ward C Content -->
   <div id="WardC" class="tabcontent" style="display:none;">
     <h2>Ward C</h2>
     <div class="table-container">
@@ -182,15 +213,15 @@
             <th class="room-no">Room No</th>
             <th>Dx</th>
             <th>Rotator Note</th>
+            <th class="discharge-date">Discharge Date</th>
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody><!-- Rows will be inserted here --></tbody>
+        <tbody><!-- Rows inserted dynamically --></tbody>
       </table>
     </div>
   </div>
   
-  <!-- Ward D Content -->
   <div id="WardD" class="tabcontent" style="display:none;">
     <h2>Ward D</h2>
     <div class="table-container">
@@ -202,15 +233,15 @@
             <th class="room-no">Room No</th>
             <th>Dx</th>
             <th>Rotator Note</th>
+            <th class="discharge-date">Discharge Date</th>
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody><!-- Rows will be inserted here --></tbody>
+        <tbody><!-- Rows inserted dynamically --></tbody>
       </table>
     </div>
   </div>
   
-  <!-- Ward E Content -->
   <div id="WardE" class="tabcontent" style="display:none;">
     <h2>Ward E</h2>
     <div class="table-container">
@@ -222,15 +253,15 @@
             <th class="room-no">Room No</th>
             <th>Dx</th>
             <th>Rotator Note</th>
+            <th class="discharge-date">Discharge Date</th>
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody><!-- Rows will be inserted here --></tbody>
+        <tbody><!-- Rows inserted dynamically --></tbody>
       </table>
     </div>
   </div>
   
-  <!-- Ward F Content -->
   <div id="WardF" class="tabcontent" style="display:none;">
     <h2>Ward F</h2>
     <div class="table-container">
@@ -242,15 +273,15 @@
             <th class="room-no">Room No</th>
             <th>Dx</th>
             <th>Rotator Note</th>
+            <th class="discharge-date">Discharge Date</th>
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody><!-- Rows will be inserted here --></tbody>
+        <tbody><!-- Rows inserted dynamically --></tbody>
       </table>
     </div>
   </div>
   
-  <!-- Ward G Content -->
   <div id="WardG" class="tabcontent" style="display:none;">
     <h2>Ward G</h2>
     <div class="table-container">
@@ -262,15 +293,15 @@
             <th class="room-no">Room No</th>
             <th>Dx</th>
             <th>Rotator Note</th>
+            <th class="discharge-date">Discharge Date</th>
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody><!-- Rows will be inserted here --></tbody>
+        <tbody><!-- Rows inserted dynamically --></tbody>
       </table>
     </div>
   </div>
   
-  <!-- Ward H Content -->
   <div id="WardH" class="tabcontent" style="display:none;">
     <h2>Ward H</h2>
     <div class="table-container">
@@ -282,15 +313,15 @@
             <th class="room-no">Room No</th>
             <th>Dx</th>
             <th>Rotator Note</th>
+            <th class="discharge-date">Discharge Date</th>
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody><!-- Rows will be inserted here --></tbody>
+        <tbody><!-- Rows inserted dynamically --></tbody>
       </table>
     </div>
   </div>
   
-  <!-- Ward I Content -->
   <div id="WardI" class="tabcontent" style="display:none;">
     <h2>Ward I</h2>
     <div class="table-container">
@@ -302,10 +333,11 @@
             <th class="room-no">Room No</th>
             <th>Dx</th>
             <th>Rotator Note</th>
+            <th class="discharge-date">Discharge Date</th>
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody><!-- Rows will be inserted here --></tbody>
+        <tbody><!-- Rows inserted dynamically --></tbody>
       </table>
     </div>
   </div>
@@ -329,28 +361,28 @@
       evt.currentTarget.classList.add("active");
     }
     
-    // Load discharged patients from Back4App and display them in the appropriate ward table
+    // Load discharged patients from Back4App and display them by ward
     async function loadPatients() {
       const Patient = Parse.Object.extend("Patient");
       const query = new Parse.Query(Patient);
-      // Query only discharged patients
-      query.equalTo("discharged", true);
+      query.equalTo("discharged", true); // Only load discharged patients
       try {
         const results = await query.find();
-        // Clear existing table rows in all ward tables
+        // Clear all table bodies
         document.querySelectorAll("table tbody").forEach(tbody => tbody.innerHTML = "");
-        // Loop through each patient record
+        // Loop through each discharged patient
         results.forEach(patient => {
-          // Default ward to "Ward A" if not set; otherwise, use patient.get("ward")
+          // Default ward to "Ward A" if not set
           let ward = (patient.get("ward") || "Ward A").toLowerCase();
           const name = patient.get("name") || "";
           const doctor = patient.get("doctor") || "";
           const roomNumber = patient.get("roomNumber") || "";
           const diagnosis = patient.get("diagnosis") || "";
           const rotaterNote = patient.get("rotaterNote") || "";
+          const dischargeDate = patient.get("dischargeDate") ? new Date(patient.get("dischargeDate")).toLocaleString() : "";
           const objectId = patient.id;
           
-          // Create a table row with the new "Rotator Note" column and a smaller Room No column
+          // Create a table row including the new "Discharge Date" column
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${name}</td>
@@ -358,12 +390,14 @@
             <td class="room-no">${roomNumber}</td>
             <td>${diagnosis}</td>
             <td>${rotaterNote}</td>
+            <td class="discharge-date">${dischargeDate}</td>
             <td>
-              <button class="action-btn btn-print" onclick="printMeds('${objectId}')">Print</button>
+              <button class="action-btn btn-print" onclick="printPatient('${objectId}')">Print</button>
+              <button class="action-btn btn-restore" onclick="restorePatient('${objectId}', this)">Restore</button>
             </td>
           `;
           
-          // Append row to the appropriate ward table based on ward name
+          // Append the row to the appropriate ward table based on ward
           if (ward === "ward a") {
             document.querySelector("#tableWardA tbody").appendChild(tr);
           } else if (ward === "ward b") {
@@ -385,12 +419,12 @@
           }
         });
       } catch (error) {
-        console.error("Error loading discharged patients: ", error);
+        console.error("Error loading discharged patients:", error);
       }
     }
     
-    // Print medications (or patient details) in a new window
-    async function printMeds(patientId) {
+    // Print patient details in a new window
+    async function printPatient(patientId) {
       const Patient = Parse.Object.extend("Patient");
       const query = new Parse.Query(Patient);
       try {
@@ -401,6 +435,7 @@
         htmlContent += `<p><strong>Room No:</strong> ${patient.get("roomNumber") || ""}</p>`;
         htmlContent += `<p><strong>Diagnosis:</strong> ${patient.get("diagnosis") || ""}</p>`;
         htmlContent += `<p><strong>Rotator Note:</strong> ${patient.get("rotaterNote") || ""}</p>`;
+        htmlContent += `<p><strong>Discharge Date:</strong> ${patient.get("dischargeDate") ? new Date(patient.get("dischargeDate")).toLocaleString() : ""}</p>`;
         htmlContent += `</body></html>`;
         const printWindow = window.open("", "", "height=600,width=800");
         printWindow.document.write(htmlContent);
@@ -409,6 +444,25 @@
         printWindow.print();
       } catch (error) {
         alert("Error printing patient details: " + error.message);
+      }
+    }
+    
+    // Restore a discharged patient: update record and remove from UI
+    async function restorePatient(patientId, button) {
+      const Patient = Parse.Object.extend("Patient");
+      const query = new Parse.Query(Patient);
+      try {
+        const patient = await query.get(patientId);
+        patient.set("discharged", false);
+        // Optionally clear the discharge date
+        patient.unset("dischargeDate");
+        await patient.save();
+        // Remove the row from the UI
+        const row = button.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+        alert("Patient restored to active status.");
+      } catch (error) {
+        alert("Error restoring patient: " + error.message);
       }
     }
     
