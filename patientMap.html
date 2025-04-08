@@ -41,7 +41,7 @@
       align-items: center;
       padding: 0 10px;
     }
-    /* Ward selection dropdown and refresh button container */
+    /* Controls Container: Dropdown for ward selection and refresh button */
     .controls-container {
       width: 100%;
       max-width: 400px;
@@ -263,6 +263,7 @@
     <h1>Patient Map</h1>
     <div class="header-flex">
       <div class="controls-container">
+        <!-- Ward selection as dropdown -->
         <select id="wardSelect" onchange="selectWard()">
           <option value="WardA">Ward A</option>
           <option value="WardB">Ward B</option>
@@ -456,18 +457,16 @@
   
   <script>
     // Initialize Parse with your Back4App credentials
-    Parse.initialize("dYITxG0Ku084MmAjH3aa4rCsYBphkHR1Ua7CcIKI", "nMlAh8q6Pf63Ji7mT7mZsAfOeL3Sj2Ikl6Af2VOT");
+    Parse.initialize("JntBzRh42hSe74SIbVM1CQZr2D51YcVbDKcH60m6", "yxn7Yup1UUZildFxcG8a0gmZmUBFEkBwD6gfP702");
     Parse.serverURL = 'https://parseapi.back4app.com/';
     
-    // When ward is selected from the dropdown, show corresponding content
+    // Function to switch ward views based on dropdown selection
     function selectWard() {
       const selectedWard = document.getElementById("wardSelect").value;
-      // Hide all ward content divs
       const tabcontents = document.getElementsByClassName("tabcontent");
       for (let i = 0; i < tabcontents.length; i++) {
         tabcontents[i].style.display = "none";
       }
-      // Display the selected ward's content div
       document.getElementById(selectedWard).style.display = "block";
     }
     
@@ -475,14 +474,13 @@
     async function loadPatients() {
       const Patient = Parse.Object.extend("Patient");
       const query = new Parse.Query(Patient);
-      query.notEqualTo("discharged", true); // Only load active (non-discharged) patients
+      query.notEqualTo("discharged", true); // Only load patients not discharged
       try {
         const results = await query.find();
         // Clear existing table rows in all ward tables
         document.querySelectorAll("table tbody").forEach(tbody => tbody.innerHTML = "");
         // Loop through each patient record
         results.forEach(patient => {
-          // Default ward to "Ward A" if not set; otherwise, use patient.get("ward")
           let ward = (patient.get("ward") || "Ward A").toLowerCase();
           const name = patient.get("name") || "";
           const doctor = patient.get("doctor") || "";
@@ -491,7 +489,7 @@
           const rotaterNote = patient.get("rotaterNote") || "";
           const objectId = patient.id;
           
-          // Create a table row with a smaller Room No column and a Rotator Note column
+          // Create a new row with the new columns
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${name}</td>
@@ -507,7 +505,7 @@
             </td>
           `;
           
-          // Append row to the appropriate ward table based on ward name
+          // Append row to the appropriate ward table based on ward
           if (ward === "ward a") {
             document.querySelector("#tableWardA tbody").appendChild(tr);
           } else if (ward === "ward b") {
@@ -538,17 +536,16 @@
       window.location.href = "editPatient.html?id=" + encodeURIComponent(patientId);
     }
     
-    // Discharge patient: mark as discharged on Back4App and remove row from UI
+    // Discharge patient: set discharged true, record discharge date/time, remove row from UI
     async function dischargePatient(patientId, button) {
       const Patient = Parse.Object.extend("Patient");
       const query = new Parse.Query(Patient);
       try {
         const patient = await query.get(patientId);
         patient.set("discharged", true);
-        // Record discharge date/time automatically
         patient.set("dischargeDate", new Date().toISOString());
         await patient.save();
-        // Remove the row from the UI
+        // Remove the row from UI
         const row = button.parentNode.parentNode;
         row.parentNode.removeChild(row);
         alert("Patient marked as discharged.");
@@ -598,7 +595,7 @@
       }
     }
     
-    // Global variables for the medications modal
+    // Global variables for medications modal
     let currentPatientIdForMedications = null;
     let currentPatientRecord = null;
     
