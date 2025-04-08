@@ -41,18 +41,35 @@
       align-items: center;
       padding: 0 10px;
     }
-    /* Ward Selection Dropdown */
-    .ward-select-container {
-      margin: 10px 0;
+    /* Ward selection dropdown and refresh button container */
+    .controls-container {
       width: 100%;
       max-width: 400px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 10px 0;
     }
-    .ward-select-container select {
-      width: 100%;
+    .controls-container select {
+      flex: 1;
       padding: 8px 12px;
       font-size: 14px;
       border: 1px solid var(--primary-color);
       border-radius: 4px;
+    }
+    .controls-container button {
+      background-color: var(--secondary-color);
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      margin-left: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-size: 14px;
+    }
+    .controls-container button:hover {
+      background-color: #218838;
     }
     .add-patient-container {
       margin-top: 10px;
@@ -192,6 +209,7 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
+      font-size: 14px;
     }
     #medicationsModal .save-btn {
       background-color: var(--secondary-color);
@@ -211,10 +229,15 @@
       border-radius: 4px;
       padding: 6px 10px;
       cursor: pointer;
+      font-size: 14px;
     }
     /* Mobile Styles */
     @media (max-width: 600px) {
-      .ward-select-container select {
+      .controls-container select {
+        font-size: 12px;
+        padding: 6px 8px;
+      }
+      .controls-container button {
         font-size: 12px;
         padding: 6px 8px;
       }
@@ -239,8 +262,7 @@
   <header>
     <h1>Patient Map</h1>
     <div class="header-flex">
-      <!-- Ward Selection Dropdown -->
-      <div class="ward-select-container">
+      <div class="controls-container">
         <select id="wardSelect" onchange="selectWard()">
           <option value="WardA">Ward A</option>
           <option value="WardB">Ward B</option>
@@ -252,6 +274,7 @@
           <option value="WardH">Ward H</option>
           <option value="WardI">Ward I</option>
         </select>
+        <button onclick="loadPatients()">Refresh Data</button>
       </div>
       <div class="add-patient-container">
         <button class="add-patient-btn" onclick="window.location.href='addPatient.html'">Add Patient</button>
@@ -436,7 +459,7 @@
     Parse.initialize("dYITxG0Ku084MmAjH3aa4rCsYBphkHR1Ua7CcIKI", "nMlAh8q6Pf63Ji7mT7mZsAfOeL3Sj2Ikl6Af2VOT");
     Parse.serverURL = 'https://parseapi.back4app.com/';
     
-    // When a ward is selected from the dropdown, show the corresponding ward content
+    // When ward is selected from the dropdown, show corresponding content
     function selectWard() {
       const selectedWard = document.getElementById("wardSelect").value;
       // Hide all ward content divs
@@ -444,7 +467,7 @@
       for (let i = 0; i < tabcontents.length; i++) {
         tabcontents[i].style.display = "none";
       }
-      // Display the selected ward content
+      // Display the selected ward's content div
       document.getElementById(selectedWard).style.display = "block";
     }
     
@@ -452,7 +475,7 @@
     async function loadPatients() {
       const Patient = Parse.Object.extend("Patient");
       const query = new Parse.Query(Patient);
-      query.notEqualTo("discharged", true); // Only load patients not discharged
+      query.notEqualTo("discharged", true); // Only load active (non-discharged) patients
       try {
         const results = await query.find();
         // Clear existing table rows in all ward tables
@@ -468,7 +491,7 @@
           const rotaterNote = patient.get("rotaterNote") || "";
           const objectId = patient.id;
           
-          // Create a table row with the "Rotator Note" column and a smaller Room No column
+          // Create a table row with a smaller Room No column and a Rotator Note column
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${name}</td>
@@ -506,7 +529,7 @@
           }
         });
       } catch (error) {
-        console.error("Error loading patients: ", error);
+        console.error("Error loading patients:", error);
       }
     }
     
@@ -522,7 +545,7 @@
       try {
         const patient = await query.get(patientId);
         patient.set("discharged", true);
-        // Optionally, record the discharge date/time on the patient record
+        // Record discharge date/time automatically
         patient.set("dischargeDate", new Date().toISOString());
         await patient.save();
         // Remove the row from the UI
@@ -575,7 +598,7 @@
       }
     }
     
-    // Global variables for medications modal
+    // Global variables for the medications modal
     let currentPatientIdForMedications = null;
     let currentPatientRecord = null;
     
