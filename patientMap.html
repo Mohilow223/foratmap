@@ -41,7 +41,7 @@
       align-items: center;
       padding: 0 10px;
     }
-    /* Controls Container: Dropdown for ward selection and refresh button */
+    /* Controls container: Dropdown for ward selection and Refresh button */
     .controls-container {
       width: 100%;
       max-width: 400px;
@@ -104,8 +104,7 @@
       border-collapse: collapse;
       margin-top: 10px;
     }
-    table th,
-    table td {
+    table th, table td {
       border: 1px solid #ddd;
       padding: 8px;
       text-align: left;
@@ -188,8 +187,7 @@
       border-collapse: collapse;
       margin-top: 10px;
     }
-    #medicationsModal th,
-    #medicationsModal td {
+    #medicationsModal th, #medicationsModal td {
       border: 1px solid #ddd;
       padding: 8px;
       text-align: left;
@@ -263,17 +261,17 @@
     <h1>Patient Map</h1>
     <div class="header-flex">
       <div class="controls-container">
-        <!-- Ward selection as dropdown -->
+        <!-- Ward selection as dropdown; option values match the IDs of tab content -->
         <select id="wardSelect" onchange="selectWard()">
-          <option value="Ward A">Ward A</option>
-          <option value="Ward B">Ward B</option>
-          <option value="Ward C">Ward C</option>
-          <option value="Ward D">Ward D</option>
-          <option value="Ward E">Ward E</option>
-          <option value="Ward F">Ward F</option>
-          <option value="Ward G">Ward G</option>
-          <option value="Ward H">Ward H</option>
-          <option value="Ward I">Ward I</option>
+          <option value="WardA">Ward A</option>
+          <option value="WardB">Ward B</option>
+          <option value="WardC">Ward C</option>
+          <option value="WardD">Ward D</option>
+          <option value="WardE">Ward E</option>
+          <option value="WardF">Ward F</option>
+          <option value="WardG">Ward G</option>
+          <option value="WardH">Ward H</option>
+          <option value="WardI">Ward I</option>
         </select>
         <button onclick="loadPatients()">Refresh Data</button>
       </div>
@@ -283,8 +281,8 @@
     </div>
   </header>
   
-  <!-- 9 Ward Contents -->
-  <div id="Ward A" class="tabcontent">
+  <!-- 9 Ward Contents with IDs without spaces -->
+  <div id="WardA" class="tabcontent">
     <h2>Ward A</h2>
     <div class="table-container">
       <table id="tableWardA">
@@ -303,7 +301,7 @@
     </div>
   </div>
   
-  <div id="Ward B" class="tabcontent" style="display:none;">
+  <div id="WardB" class="tabcontent" style="display:none;">
     <h2>Ward B</h2>
     <div class="table-container">
       <table id="tableWardB">
@@ -322,7 +320,7 @@
     </div>
   </div>
   
-  <div id="Ward C" class="tabcontent" style="display:none;">
+  <div id="WardC" class="tabcontent" style="display:none;">
     <h2>Ward C</h2>
     <div class="table-container">
       <table id="tableWardC">
@@ -341,7 +339,7 @@
     </div>
   </div>
   
-  <div id="Ward D" class="tabcontent" style="display:none;">
+  <div id="WardD" class="tabcontent" style="display:none;">
     <h2>Ward D</h2>
     <div class="table-container">
       <table id="tableWardD">
@@ -360,7 +358,7 @@
     </div>
   </div>
   
-  <div id="Ward E" class="tabcontent" style="display:none;">
+  <div id="WardE" class="tabcontent" style="display:none;">
     <h2>Ward E</h2>
     <div class="table-container">
       <table id="tableWardE">
@@ -379,7 +377,7 @@
     </div>
   </div>
   
-  <div id="Ward F" class="tabcontent" style="display:none;">
+  <div id="WardF" class="tabcontent" style="display:none;">
     <h2>Ward F</h2>
     <div class="table-container">
       <table id="tableWardF">
@@ -398,7 +396,7 @@
     </div>
   </div>
   
-  <div id="Ward G" class="tabcontent" style="display:none;">
+  <div id="WardG" class="tabcontent" style="display:none;">
     <h2>Ward G</h2>
     <div class="table-container">
       <table id="tableWardG">
@@ -417,7 +415,7 @@
     </div>
   </div>
   
-  <div id="Ward H" class="tabcontent" style="display:none;">
+  <div id="WardH" class="tabcontent" style="display:none;">
     <h2>Ward H</h2>
     <div class="table-container">
       <table id="tableWardH">
@@ -436,7 +434,7 @@
     </div>
   </div>
   
-  <div id="Ward I" class="tabcontent" style="display:none;">
+  <div id="WardI" class="tabcontent" style="display:none;">
     <h2>Ward I</h2>
     <div class="table-container">
       <table id="tableWardI">
@@ -460,7 +458,7 @@
     Parse.initialize("dYITxG0Ku084MmAjH3aa4rCsYBphkHR1Ua7CcIKI", "nMlAh8q6Pf63Ji7mT7mZsAfOeL3Sj2Ikl6Af2VOT");
     Parse.serverURL = 'https://parseapi.back4app.com/';
     
-    // When a ward is selected from the dropdown, show the corresponding ward content
+    // When a ward is selected from the dropdown, display the corresponding ward content
     function selectWard() {
       const selectedWard = document.getElementById("wardSelect").value;
       const tabcontents = document.getElementsByClassName("tabcontent");
@@ -470,20 +468,20 @@
       document.getElementById(selectedWard).style.display = "block";
     }
     
-    // Load only non-discharged patients from Back4App
+    // Load only active (non-discharged) patients from Back4App
     async function loadPatients() {
       const Patient = Parse.Object.extend("Patient");
       const query = new Parse.Query(Patient);
-      query.notEqualTo("discharged", true); // Only load active patients
+      query.notEqualTo("discharged", true); // Only load patients that are active
       try {
         const results = await query.find();
         // Clear existing table rows in all ward tables
         document.querySelectorAll("table tbody").forEach(tbody => tbody.innerHTML = "");
         // Loop through each patient record
         results.forEach(patient => {
-          // Use the saved ward value (or default to "Ward A")
-          let ward = patient.get("ward") || "Ward A";
-          ward = ward.trim(); // Ensure no trailing spaces
+          // Get the ward from the patient record and remove any extra whitespace;
+          // Default to "Ward A" if not set.
+          let ward = (patient.get("ward") || "Ward A").replace(/\s/g, "");
           const name = patient.get("name") || "";
           const doctor = patient.get("doctor") || "";
           const roomNumber = patient.get("roomNumber") || "";
@@ -506,24 +504,26 @@
             </td>
           `;
           
-          // Append the row to the appropriate ward table based on the ward string
-          if (ward === "Ward A") {
+          // Append the row to the appropriate ward table based on the ward value.
+          // Make sure your addPatient page saves ward values like "Ward A" (with a space).
+          // We convert it to no space for comparison.
+          if (ward === "WardA") {
             document.querySelector("#tableWardA tbody").appendChild(tr);
-          } else if (ward === "Ward B") {
+          } else if (ward === "WardB") {
             document.querySelector("#tableWardB tbody").appendChild(tr);
-          } else if (ward === "Ward C") {
+          } else if (ward === "WardC") {
             document.querySelector("#tableWardC tbody").appendChild(tr);
-          } else if (ward === "Ward D") {
+          } else if (ward === "WardD") {
             document.querySelector("#tableWardD tbody").appendChild(tr);
-          } else if (ward === "Ward E") {
+          } else if (ward === "WardE") {
             document.querySelector("#tableWardE tbody").appendChild(tr);
-          } else if (ward === "Ward F") {
+          } else if (ward === "WardF") {
             document.querySelector("#tableWardF tbody").appendChild(tr);
-          } else if (ward === "Ward G") {
+          } else if (ward === "WardG") {
             document.querySelector("#tableWardG tbody").appendChild(tr);
-          } else if (ward === "Ward H") {
+          } else if (ward === "WardH") {
             document.querySelector("#tableWardH tbody").appendChild(tr);
-          } else if (ward === "Ward I") {
+          } else if (ward === "WardI") {
             document.querySelector("#tableWardI tbody").appendChild(tr);
           }
         });
@@ -537,7 +537,7 @@
       window.location.href = "editPatient.html?id=" + encodeURIComponent(patientId);
     }
     
-    // Discharge patient: mark as discharged on Back4App, record date/time, remove row from UI
+    // Discharge patient: update record (set discharged to true, record discharge date/time) and remove row from UI
     async function dischargePatient(patientId, button) {
       const Patient = Parse.Object.extend("Patient");
       const query = new Parse.Query(Patient);
@@ -546,7 +546,6 @@
         patient.set("discharged", true);
         patient.set("dischargeDate", new Date().toISOString());
         await patient.save();
-        // Remove row from UI
         const row = button.parentNode.parentNode;
         row.parentNode.removeChild(row);
         alert("Patient marked as discharged.");
@@ -555,7 +554,7 @@
       }
     }
     
-    // Print medications for a patient in a new window
+    // Print medications list for a patient in a new window
     async function printMeds(patientId) {
       const Patient = Parse.Object.extend("Patient");
       const query = new Parse.Query(Patient);
@@ -709,7 +708,7 @@
       printWindow.print();
     }
     
-    // Load patients when the page loads
+    // Load patients on page load
     window.onload = loadPatients;
   </script>
   
