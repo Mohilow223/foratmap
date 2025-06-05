@@ -1,113 +1,91 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hospital EMR Login</title>
-  <!-- Using Google Fonts for a modern look -->
-  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
-  <!-- Include Parse SDK -->
-  <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
+  <link href="common.css" rel="stylesheet" />
+  <script src="common.js"></script>
   <style>
-    /* Modern, minimal style for the login page */
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Roboto', sans-serif;
-      background: linear-gradient(135deg, #74ABE2, #5563DE);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
     .login-container {
-      background: #fff;
-      padding: 40px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 350px;
-      text-align: center;
+      background-color: #fff;
+      padding: 24px;
+      border-radius: var(--border-radius);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin: 60px auto;
     }
     .login-container h2 {
+      text-align: center;
       margin-bottom: 20px;
-      color: #333;
     }
-    .form-group {
-      margin-bottom: 20px;
-      text-align: left;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      color: #555;
-    }
-    .form-group input {
-      width: 100%;
+    .alert {
       padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 16px;
-    }
-    button {
-      width: 100%;
-      padding: 10px;
-      background-color: #5563DE;
+      background-color: var(--danger-color);
       color: #fff;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #4453c3;
+      border-radius: var(--border-radius);
+      margin-bottom: 12px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <div class="login-container">
-    <h2>Hospital EMR Login</h2>
-    <form id="loginForm">
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" required>
-      </div>
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required>
-      </div>
-      <button type="submit">Login</button>
-    </form>
+  <div class="container">
+    <div class="login-container">
+      <h2>Hospital EMR Login</h2>
+      <div id="alert-box" class="alert" style="display:none;"></div>
+      <label for="username">Username</label>
+      <input type="text" id="username" placeholder="Enter username" />
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Enter password" />
+      <button class="btn btn-primary" onclick="handleLogin()">Login</button>
+    </div>
   </div>
-  <script>
-    // Initialize Parse with your Back4App credentials
-    Parse.initialize("JntBzRh42hSe74SIbVM1CQZr2D51YcVbDKcH60m6", "yxn7Yup1UUZildFxcG8a0gmZmUBFEkBwD6gfP702");
-    Parse.serverURL = 'https://parseapi.back4app.com/';
 
-    // Login function using Parse.User.logIn to verify credentials
-    document.getElementById('loginForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      var username = document.getElementById('username').value.trim();
-      var password = document.getElementById('password').value.trim();
-      
-      if (username === "" || password === "") {
-        alert("Please fill in all fields.");
+  <script>
+    // Handle login: check "User" class in Parse
+    async function handleLogin() {
+      const uname = document.getElementById("username").value.trim();
+      const pwd   = document.getElementById("password").value.trim();
+      const alertBox = document.getElementById("alert-box");
+      alertBox.style.display = "none";
+
+      if (!uname || !pwd) {
+        alertBox.textContent = "Please enter both username and password.";
+        alertBox.style.display = "block";
         return;
       }
-      
+
+      // Query Parse User class (custom Class: "User") for matching credentials
+      const User = Parse.Object.extend("User");
+      const query = new Parse.Query(User);
+      query.equalTo("username", uname);
+      query.equalTo("password", pwd);
       try {
-        // Attempt to log in with Parse
-        const user = await Parse.User.logIn(username, password);
-        // If the user has a role and it equals "admin" (case insensitive), redirect to the dashboard.
-        if (user.get("role") && user.get("role").toLowerCase() === "admin") {
-          window.location.href = "dashboard.html";
+        const results = await query.find();
+        if (results.length === 0) {
+          alertBox.textContent = "Invalid credentials.";
+          alertBox.style.display = "block";
+          return;
+        }
+        const userObj = results[0];
+        const isAdmin = userObj.get("isAdmin");
+        if (isAdmin) {
+          localStorage.setItem("currentUserId", userObj.id);
+          localStorage.setItem("isAdmin", "true");
+          goTo("admin.html");
         } else {
-          window.location.href = "patientMap.html";
+          localStorage.setItem("currentUserId", userObj.id);
+          localStorage.setItem("isAdmin", "false");
+          goTo("map.html");
         }
       } catch (error) {
-        // Display an error message if login fails
-        alert("Login failed: " + error.message);
+        console.error("Login error:", error);
+        alertBox.textContent = "Error during login. Check console.";
+        alertBox.style.display = "block";
       }
-    });
+    }
   </script>
 </body>
 </html>
