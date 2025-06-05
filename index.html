@@ -1,89 +1,370 @@
-<!-- index.html -->
+<!-- map.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hospital EMR Login</title>
+  <title>Patient Map</title>
+  <!-- Shared CSS & JS -->
   <link href="common.css" rel="stylesheet" />
   <script src="common.js"></script>
   <style>
-    .login-container {
-      background-color: #fff;
-      padding: 24px;
-      border-radius: var(--border-radius);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      max-width: 400px;
-      margin: 60px auto;
+    .logout-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
     }
-    .login-container h2 {
-      text-align: center;
-      margin-bottom: 20px;
+    .section-header {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
     }
-    .alert {
-      padding: 10px;
-      background-color: var(--danger-color);
-      color: #fff;
-      border-radius: var(--border-radius);
+    .section-header select {
+      max-width: 200px;
+    }
+    .add-patient-btn {
+      margin-top: 10px;
+    }
+    .tabcontent {
+      display: none;
+    }
+    .active-tab {
+      display: block;
+    }
+    /* Ensure each ward heading has some spacing */
+    .tabcontent h2 {
       margin-bottom: 12px;
-      text-align: center;
     }
   </style>
 </head>
 <body>
+  <!-- Logout button in top right -->
+  <button class="btn btn-danger logout-btn" onclick="logout()">Logout</button>
+
   <div class="container">
-    <div class="login-container">
-      <h2>Hospital EMR Login</h2>
-      <div id="alert-box" class="alert" style="display:none;"></div>
-      <label for="username">Username</label>
-      <input type="text" id="username" placeholder="Enter username" />
-      <label for="password">Password</label>
-      <input type="password" id="password" placeholder="Enter password" />
-      <button class="btn btn-primary" onclick="handleLogin()">Login</button>
+    <h1>Patient Map</h1>
+
+    <div class="section-header">
+      <!-- Ward selection dropdown -->
+      <div>
+        <label for="wardSelect">Select Ward:</label>
+        <select id="wardSelect" onchange="selectWard()">
+          <!-- Options inserted dynamically -->
+        </select>
+      </div>
+      <!-- Add + Refresh buttons -->
+      <div>
+        <button class="btn btn-secondary add-patient-btn" onclick="goTo('addPatient.html')">
+          Add Patient
+        </button>
+        <button class="btn btn-info" onclick="loadPatients()">Refresh Data</button>
+      </div>
+    </div>
+
+    <!-- Container where each ward’s table is injected -->
+    <div id="wardsContainer"></div>
+  </div>
+
+  <!-- Medication Modal -->
+  <div id="medicationsModal"
+       style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+    <div class="modal-content"
+         style="background:#fff; margin:10% auto; padding:20px; border-radius:var(--border-radius);
+                width:95%; max-width:600px; position:relative;">
+      <button class="close-btn btn btn-danger"
+              style="position:absolute; top:10px; right:10px;"
+              onclick="closeMedicationsModal()">Close</button>
+      <h2>Edit Medications</h2>
+      <div class="table-container">
+        <table id="modalMedicationTable">
+          <thead>
+            <tr>
+              <th>Medication Name</th>
+              <th>Dose</th>
+              <th>Frequency</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <button class="btn btn-secondary" onclick="addModalMedicationRow()">Add Medication Row</button>
+      <div style="margin-top:16px; text-align:right;">
+        <button class="btn btn-primary" onclick="saveMedications()">Save</button>
+        <button class="btn btn-warning" onclick="printModalMedications()">Print</button>
+      </div>
     </div>
   </div>
 
   <script>
-    // Handle login: check "User" class in Parse
-    async function handleLogin() {
-      const uname = document.getElementById("username").value.trim();
-      const pwd   = document.getElementById("password").value.trim();
-      const alertBox = document.getElementById("alert-box");
-      alertBox.style.display = "none";
+    // Ensure the user is logged in as a normal user (not admin).
+    if (!localStorage.getItem("currentUserId") || localStorage.getItem("isAdmin") !== "false") {
+      goTo("index.html");
+    }
 
-      if (!uname || !pwd) {
-        alertBox.textContent = "Please enter both username and password.";
-        alertBox.style.display = "block";
-        return;
+    let allWards = [];               // Will hold { id, code, name }
+    let currentWardCode = "";        // e.g. "WardA"
+    let currentMedPatient = null;    // Parse.Object being edited for meds
+
+    // On page load, ensure wards exist, build UI, then load patients.
+    window.onload = async () => {
+      await ensureDefaultWards();
+      allWards = await loadAllWards();
+      buildWardSelect();
+      buildWardContainers();
+
+      // Show the first ward by default
+      if (allWards.length > 0) {
+        currentWardCode = allWards[0].code;
+        document.getElementById(currentWardCode).classList.add("active-tab");
       }
 
-      // Query Parse User class (custom Class: "User") for matching credentials
-      const User = Parse.Object.extend("User");
-      const query = new Parse.Query(User);
-      query.equalTo("username", uname);
-      query.equalTo("password", pwd);
+      loadPatients();
+    };
+
+    function logout() {
+      localStorage.clear();
+      goTo("index.html");
+    }
+
+    // 1) Populate the <select> with all ward codes & names
+    function buildWardSelect() {
+      const sel = document.getElementById("wardSelect");
+      sel.innerHTML = "";
+      allWards.forEach(w => {
+        const opt = document.createElement("option");
+        opt.value = w.code;       // "WardA", "WardB", ...
+        opt.textContent = w.name; // "Ward A", "Ward B", ...
+        sel.appendChild(opt);
+      });
+    }
+
+    // 2) Create one <div> + <table> per ward, but hidden initially
+    function buildWardContainers() {
+      const container = document.getElementById("wardsContainer");
+      container.innerHTML = "";
+      allWards.forEach(w => {
+        const div = document.createElement("div");
+        div.id = w.code;            // e.g. "WardA"
+        div.className = "tabcontent";
+
+        const heading = document.createElement("h2");
+        heading.textContent = w.name;
+        div.appendChild(heading);
+
+        const tableDiv = document.createElement("div");
+        tableDiv.className = "table-container";
+        const tbl = document.createElement("table");
+        tbl.id = "table" + w.code; // e.g. "tableWardA"
+        tbl.innerHTML = `
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Doctor</th>
+              <th class="room-no">Room No</th>
+              <th>Dx</th>
+              <th>Rotator Note</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        `;
+        tableDiv.appendChild(tbl);
+        div.appendChild(tableDiv);
+        container.appendChild(div);
+      });
+    }
+
+    // 3) When the user selects a ward from the dropdown:
+    function selectWard() {
+      currentWardCode = document.getElementById("wardSelect").value;
+      document.querySelectorAll(".tabcontent").forEach(div => {
+        div.classList.remove("active-tab");
+      });
+      document.getElementById(currentWardCode)?.classList.add("active-tab");
+    }
+
+    // 4) Fetch all non-discharged patients and populate each ward’s table
+    async function loadPatients() {
+      const Patient = Parse.Object.extend("Patient");
+      const query = new Parse.Query(Patient);
+      query.notEqualTo("discharged", true);
       try {
         const results = await query.find();
-        if (results.length === 0) {
-          alertBox.textContent = "Invalid credentials.";
-          alertBox.style.display = "block";
-          return;
-        }
-        const userObj = results[0];
-        const isAdmin = userObj.get("isAdmin");
-        if (isAdmin) {
-          localStorage.setItem("currentUserId", userObj.id);
-          localStorage.setItem("isAdmin", "true");
-          goTo("admin.html");
+        console.log("Fetched Patients:", results);
+        // Clear existing rows
+        allWards.forEach(w => {
+          const tbody = document.querySelector(`#table${w.code} tbody`);
+          if (tbody) tbody.innerHTML = "";
+        });
+
+        // Append each patient to the right ward table
+        results.forEach(patient => {
+          const wardRaw = patient.get("ward") || "Ward A";
+          const wardCode = wardRaw.replace(/\s/g, ""); // e.g. "WardA"
+          const match = allWards.find(w => w.code === wardCode);
+          if (!match) {
+            console.warn("No Ward match for:", wardRaw);
+            return;
+          }
+
+          const tr = document.createElement("tr");
+          const name = patient.get("name") || "";
+          const doctor = patient.get("doctor") || "";
+          const roomNumber = patient.get("roomNumber") || "";
+          const diagnosis = patient.get("diagnosis") || "";
+          const rotaterNote = patient.get("rotaterNote") || "";
+          const pid = patient.id;
+
+          tr.innerHTML = `
+            <td>${name}</td>
+            <td>${doctor}</td>
+            <td class="room-no">${roomNumber}</td>
+            <td>${diagnosis}</td>
+            <td>${rotaterNote}</td>
+            <td>
+              <button class="btn btn-info btn-mini" onclick="editPatient('${pid}')">Edit</button>
+              <button class="btn btn-danger btn-mini" onclick="dischargePatient('${pid}', this)">Discharge</button>
+              <button class="btn btn-warning btn-mini" onclick="printMeds('${pid}')">Print Meds</button>
+              <button class="btn btn-primary btn-mini" onclick="openMedicationsModal('${pid}')">Medications</button>
+            </td>
+          `;
+          const tbody = document.querySelector(`#table${wardCode} tbody`);
+          if (tbody) tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error("Error loading patients:", err);
+        alert("Error loading patients. Check console for details.");
+      }
+    }
+
+    // Redirect to editPatient.html with ?id=<patientId>
+    function editPatient(patientId) {
+      goTo(`editPatient.html?id=${encodeURIComponent(patientId)}`);
+    }
+
+    // Discharge a patient, mark discharged=true, record timestamp, then remove row
+    async function dischargePatient(patientId, btn) {
+      const Patient = Parse.Object.extend("Patient");
+      const query = new Parse.Query(Patient);
+      try {
+        const patObj = await query.get(patientId);
+        patObj.set("discharged", true);
+        patObj.set("dischargeDate", new Date().toISOString());
+        await patObj.save();
+        const row = btn.closest("tr");
+        row.remove();
+        alert("Patient discharged.");
+      } catch (e) {
+        console.error("Error discharging patient:", e);
+        alert("Error discharging patient. Check console.");
+      }
+    }
+
+    // Print a patient’s medications in a new window
+    async function printMeds(patientId) {
+      const Patient = Parse.Object.extend("Patient");
+      const query = new Parse.Query(Patient);
+      try {
+        const pat = await query.get(patientId);
+        const meds = pat.get("medications") || [];
+        let html = `<html><head><title>Medications for ${pat.get("name")}</title></head><body>`;
+        html += `<h2>Medications for ${pat.get("name")}</h2>`;
+        if (meds.length === 0) {
+          html += `<p>No medications recorded.</p>`;
         } else {
-          localStorage.setItem("currentUserId", userObj.id);
-          localStorage.setItem("isAdmin", "false");
-          goTo("map.html");
+          html += `<table border="1" style="width:100%; border-collapse:collapse;">
+                    <thead><tr>
+                      <th>Medication Name</th>
+                      <th>Dose</th>
+                      <th>Frequency</th>
+                    </tr></thead><tbody>`;
+          meds.forEach(m => {
+            html += `<tr>
+                        <td>${m.medName}</td>
+                        <td>${m.dose}</td>
+                        <td>${m.frequency}</td>
+                      </tr>`;
+          });
+          html += `</tbody></table>`;
         }
-      } catch (error) {
-        console.error("Login error:", error);
-        alertBox.textContent = "Error during login. Check console.";
-        alertBox.style.display = "block";
+        html += `</body></html>`;
+        const w = window.open("", "_blank", "width=600,height=600");
+        w.document.write(html);
+        w.document.close();
+        w.focus();
+        w.print();
+      } catch (e) {
+        console.error("Error printing meds:", e);
+        alert("Error printing medications. Check console.");
+      }
+    }
+
+    // === Medication Modal Logic ===
+    async function openMedicationsModal(patientId) {
+      const Patient = Parse.Object.extend("Patient");
+      const query = new Parse.Query(Patient);
+      try {
+        currentMedPatient = await query.get(patientId);
+        const meds = currentMedPatient.get("medications") || [];
+        const modalTbody = document.querySelector("#modalMedicationTable tbody");
+        modalTbody.innerHTML = "";
+        meds.forEach(m => {
+          const row = modalTbody.insertRow();
+          row.insertCell(0).innerHTML = `<input type="text" name="modalMedName[]" value="${m.medName}" required />`;
+          row.insertCell(1).innerHTML = `<input type="text" name="modalDose[]" value="${m.dose}" required />`;
+          row.insertCell(2).innerHTML = `<input type="text" name="modalFrequency[]" value="${m.frequency}" required />`;
+          row.insertCell(3).innerHTML = `<button class="btn btn-danger btn-mini" onclick="removeModalRow(this)">Remove</button>`;
+        });
+        document.getElementById("medicationsModal").style.display = "block";
+      } catch (e) {
+        console.error("Error opening meds modal:", e);
+        alert("Error fetching medications. Check console.");
+      }
+    }
+
+    function closeMedicationsModal() {
+      document.getElementById("medicationsModal").style.display = "none";
+    }
+
+    function addModalMedicationRow() {
+      const tbody = document.querySelector("#modalMedicationTable tbody");
+      const row = tbody.insertRow();
+      row.insertCell(0).innerHTML = `<input type="text" name="modalMedName[]" required />`;
+      row.insertCell(1).innerHTML = `<input type="text" name="modalDose[]" required />`;
+      row.insertCell(2).innerHTML = `<input type="text" name="modalFrequency[]" required />`;
+      row.insertCell(3).innerHTML = `<button class="btn btn-danger btn-mini" onclick="removeModalRow(this)">Remove</button>`;
+    }
+
+    function removeModalRow(btn) {
+      btn.closest("tr").remove();
+    }
+
+    async function saveMedications() {
+      if (!currentMedPatient) return;
+      const tbody = document.querySelector("#modalMedicationTable tbody");
+      const rows = tbody.rows;
+      const updatedMeds = [];
+      for (let i = 0; i < rows.length; i++) {
+        const medName = rows[i].cells[0].querySelector("input").value.trim();
+        const dose    = rows[i].cells[1].querySelector("input").value.trim();
+        const freq    = rows[i].cells[2].querySelector("input").value.trim();
+        if (medName && dose && freq) {
+          updatedMeds.push({ medName, dose, frequency: freq });
+        }
+      }
+      currentMedPatient.set("medications", updatedMeds);
+      try {
+        await currentMedPatient.save();
+        alert("Medications saved.");
+        closeMedicationsModal();
+        loadPatients();
+      } catch (e) {
+        console.error("Error saving medications:", e);
+        alert("Error saving medications. Check console.");
       }
     }
   </script>
