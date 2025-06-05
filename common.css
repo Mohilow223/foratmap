@@ -1,0 +1,173 @@
+/* common.css */
+
+/* === Reset & Box-sizing === */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* === Root Variables === */
+:root {
+  --primary-color: #2c3e50;
+  --secondary-color: #27ae60;
+  --info-color: #2980b9;
+  --danger-color: #c0392b;
+  --warning-color: #f39c12;
+  --bg-color: #ecf0f1;
+  --font-family: 'Roboto', sans-serif;
+  --border-radius: 6px;
+}
+
+/* === Base Styles === */
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-color);
+  color: #2c3e50;
+  line-height: 1.4;
+}
+
+.container {
+  width: 95%;
+  max-width: 960px;
+  margin: 20px auto;
+}
+
+h1, h2, h3 {
+  margin-bottom: 16px;
+  color: var(--primary-color);
+}
+
+/* === Buttons === */
+button, .btn {
+  font-family: inherit;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:focus {
+  outline: none;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+.btn-primary:hover {
+  background-color: #1a242f;
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color);
+  color: #fff;
+}
+.btn-secondary:hover {
+  background-color: #1e8449;
+}
+
+.btn-danger {
+  background-color: var(--danger-color);
+  color: #fff;
+}
+.btn-danger:hover {
+  background-color: #922b21;
+}
+
+.btn-info {
+  background-color: var(--info-color);
+  color: #fff;
+}
+.btn-info:hover {
+  background-color: #1f5275;
+}
+
+.btn-warning {
+  background-color: var(--warning-color);
+  color: #fff;
+}
+.btn-warning:hover {
+  background-color: #d68910;
+}
+
+/* === Form Elements === */
+input[type="text"],
+input[type="password"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  padding: 8px 10px;
+  margin-top: 6px;
+  margin-bottom: 14px;
+  border: 1px solid #bdc3c7;
+  border-radius: var(--border-radius);
+  font-size: 14px;
+}
+
+label {
+  font-weight: 500;
+  margin-top: 10px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+/* === Tables === */
+.table-container {
+  overflow-x: auto;
+  margin-top: 12px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th, td {
+  padding: 8px 10px;
+  text-align: left;
+  border: 1px solid #bdc3c7;
+}
+
+th {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+
+/* === Headings in Containers === */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+/* === Responsive Utilities === */
+@media (max-width: 600px) {
+  .section-header {
+    flex-direction: column;
+  }
+  .section-header > * {
+    width: 100%;
+    margin-top: 8px;
+  }
+  th, td {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+  input, select, textarea {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+  button, .btn {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+}
